@@ -1,0 +1,4 @@
+ffmpeg -f x11grab -r 30 -s 1920x1080 -i :1.0 -c:v libx264 -preset fast -pix_fmt yuv420p -f flv rtmp://localhost/live/stream
+ffmpeg -f v4l2 -i /dev/video0 -c:v libx264 -preset fast -pix_fmt yuv420p -f flv rtmp://localhost/live/stream2
+docker build -t nginx-rtmp-hls .
+docker run -d -p 1935:1935 -p 80:80 nginx-rtmp-hls
