@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imagen Actualizada Automáticamente</title>
+    <script>
+        function actualizarImagen() {
+            // Obtener la referencia a la imagen
+            var imagen = document.getElementById('imagen');
+
+            // Actualizar la fuente de la imagen
+            imagen.src = imagen.src + '?' + new Date().getTime(); // Agregar una marca de tiempo para evitar el caché del navegador
+        }
+
+        // Actualizar la imagen cada 5 segundos
+        setInterval(actualizarImagen, 50);
+    </script>
+</head>
+<body>
+    <img id="imagen" src="image.png" alt="Imagen Actualizada Automáticamente">
+</body>
+</html>

@@ -2,3 +2,22 @@ ffmpeg -f x11grab -r 30 -s 1920x1080 -i :1.0 -c:v libx264 -preset fast -pix_fmt 
 ffmpeg -f v4l2 -i /dev/video0 -c:v libx264 -preset fast -pix_fmt yuv420p -f flv rtmp://localhost/live/stream2
 docker build -t nginx-rtmp-hls .
 docker run -d -p 1935:1935 -p 80:80 nginx-rtmp-hls
+pacmd list-sources | grep -e 'name:' -e 'monitor'
+
+ffmpeg -f x11grab -r 30 -s 1920x1080 -i :1.0 -f pulse -i alsa_input.usb-Kingston_HyperX_Cloud_Stinger_Core___7.1_0000000000000000-00.mono-fallback -f pulse -i alsa_output.usb-Kingston_HyperX_Cloud_Stinger_Core___7.1_0000000000000000-00.analog-stereo.monitor -c:v libx264 -preset fast -pix_fmt yuv420p -c:a aac morsa.mp4
+#Screen + audio sist
+ffmpeg -f x11grab -r 25 -s 1920*1080 -i :1.0 -f pulse -i alsa_output.usb-Kingston_HyperX_Cloud_Stinger_Core___7.1_0000000000000000-00.analog-stereo.monitor  -c:v libx264 -preset fast -pix_fmt yuv420p -c:a aac -f flv rtmp://localhost/live/stream
+ffmpeg -f x11grab -r 25 -s 1920*1080 -i :1.0+1920 -f pulse -i alsa_output.usb-Kingston_HyperX_Cloud_Stinger_Core___7.1_0000000000000000-00.analog-stereo.monitor  -c:v libx264 -preset fast -pix_fmt yuv420p -c:a aac -f flv rtmp://localhost/live/stream
+
+#webcam + micro
+ffmpeg -f v4l2 -i /dev/video0 -f pulse -i alsa_input.usb-Kingston_HyperX_Cloud_Stinger_Core___7.1_0000000000000000-00.mono-fallback -c:v libx264 -preset fast -pix_fmt yuv420p -f flv rtmp://localhost/live/stream
+ffmpeg -f v4l2 -i /dev/video0 -f alsa -i pulse -c:v libx264 -preset fast -pix_fmt yuv420p -c:a aac -f flv rtmp://localhost/live/stream
+
+
+ffmpeg -loop 1 -i image.png -vf "fps=25" format=yuv420p -r 30 -f v4l2 /dev/video2 NO
+ffmpeg -loop 1 -i image.png -vf format=yuv420p -r 30 -f v4l2 /dev/video2
+
+modprobe -r v4l2loopback
+v4l2-ctl --list-devices
+modprobe v4l2loopback devices=3 video_nr=8,9 exclusive_caps=1,1,1 card_label="Loopback-1,Loopback-2,Loopback-3"
+sudo modprobe snd-aloop

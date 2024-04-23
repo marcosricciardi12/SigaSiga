@@ -5,9 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reproductor de Video</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+    
+        .video-container {
+            position: relative;
+            width: 80%; /* Puedes ajustar este valor según tus necesidades */
+            max-width: 800px; /* Limita el ancho máximo del video */
+        }
+    
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+
+
 </head>
 <body>
-    <video id="video" controls></video>
-    <script src="play_hls.js"></script>
+    <div class="video-container">
+        <video id="video" controls></video>
+        <script src="play_hls.js"></script>
+    </div>
+
 </body>
 </html>
