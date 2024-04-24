@@ -1,0 +1,1 @@
+{'nombre_local': 'default', 'puntos_local': 16, 'nombre_visita': 'default', 'puntos_visita': 0}
