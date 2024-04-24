@@ -1,1 +1,1 @@
-{'name': 'Jorge'}
+{'nombre_local': 'default', 'puntos_local': 0, 'nombre_visita': 'default', 'puntos_visita': 0}

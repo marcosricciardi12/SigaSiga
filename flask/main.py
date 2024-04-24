@@ -29,7 +29,7 @@ def generateImage():
     hora = str(datetime.now().strftime("%H:%M:%S"))
     print(hora)
     imagenes_textos = [
-        # {'tipo': 'imagen', 'posicion': (100, 100), 'contenido': 'cpbm.png'},
+         {'tipo': 'imagen', 'posicion': (100, 100), 'contenido': 'cpbm.png'},
         {'tipo': 'imagen', 'posicion': (int(1920/2)-int(928/2), 1080-158-50), 'contenido': 'sb.png'},
         {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+85, 1080-158-40), 'contenido': {'texto': "CPBM", 'color': 'white', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
         # {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+420, 1080-158-40), 'contenido': {'texto': self.team_visitor.text(), 'color': 'white', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
@@ -49,7 +49,7 @@ def generateImage():
 
         if tipo == 'imagen':
             imagen_path = contenido
-            imagen_overlay = Image.open(imagen_path).convert('RGBA')
+            imagen_overlay = Image.open(imagen_path).convert('RGB')
             imagen.paste(imagen_overlay, posicion, mask=imagen_overlay)
         elif tipo == 'texto':
             texto = contenido['texto']
@@ -66,7 +66,7 @@ def generateImage():
 
     buffer = io.BytesIO()
     imagen.save("test_frame.png")
-    imagen.save(buffer, format="PNG")
+    imagen.save(buffer, format="JPEG")
     buffer.seek(0)
     return buffer
 
@@ -101,4 +101,4 @@ def video_feed():
     return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

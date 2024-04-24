@@ -10,7 +10,13 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import io
 from flask_cors import CORS
+from redis import Redis
+import json
+import cv2
+
 app = Flask(__name__)
+app.config['REDIS_URL'] = 'redis://localhost:6379/0'  # Cambia esto según la configuración de tu servidor Redis
+redis = Redis.from_url(app.config['REDIS_URL'])
 eventos = {}
 
 def generate_frames(evento_id):
@@ -18,32 +24,55 @@ def generate_frames(evento_id):
     # Puedes utilizar una librería como OpenCV para capturar video desde una cámara o una fuente en línea
     
     while True:
-        # Aquí debes generar los frames de video en vivo
-        # Por ejemplo, utilizando OpenCV:
-        # ret, frame = capturar_video.read()
-        # Si utilizas una fuente de video en línea, puedes utilizar solicitudes HTTP para obtener los frames
-        
-        # Luego, convierte el frame en un formato adecuado, como JPEG
-        # Por ejemplo, utilizando OpenCV:
-        # ret, jpeg = cv2.imencode('.jpg', frame)
-        
-        # Devuelve el frame como bytes
-        frame = open(str(evento_id)+ ".png", "rb")
+        read_frame = redis.get(evento_id + "_frame")
+        if read_frame:
+            frame = read_frame
         # print(frame)
         try:
             yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         except:
             pass
 
-def proceso_en_segundo_plano(evento_id, parametros, eventos_creados):
+def proceso_en_segundo_plano(evento_id, redis):
+
+    # accumulated_frames = []
+    # batch_size = 300
+
+    # ffmpeg_cmd = [
+    #     'ffmpeg',
+    #     '-y',  # Sobrescribir el archivo de salida si ya existe
+    #     '-loop', '1',  # Repetir el frame
+    #     '-framerate', f'{1/0.3:.2f}',  # FPS inverso de la duración del frame
+    #     '-i', '-',  # La entrada es la tubería de imágenes (stdin)
+    #     '-c:v', 'libx264',  # Codificador de video: libx264
+    #     '-preset', 'ultrafast',  # Preset para la velocidad de codificación
+    #     '-tune', 'zerolatency',  # Ajuste para la baja latencia
+    #     '-f', 'flv',  # Formato de salida: FLV (para RTMP)
+    #     "rtmp://localhost/live/stream"  # URL del servidor RTMP
+    # ]
+    # ffmpeg_process = subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE)
+
+    video_url = 'http://localhost:5001/video_feed'
+    cap = cv2.VideoCapture(video_url)
+    if not cap.isOpened():
+        print("Error: No se pudo abrir la captura de video.")
+        exit()
+
     while True:
-        # print(eventos_creados)
-        if evento_id not in eventos_creados:
-            pass
-            # break
-        # Hacer alguna tarea asociada al evento con los parámetros actuales
-        # print("\tPID EVENTO: " + str(os.getpid()))
-        # print(f"\tTarea en segundo plano para evento {evento_id} con parámetros: {parametros}")
+        ret, frame = cap.read()
+        if ret:
+            # Convierte el fotograma a una imagen en Pillow
+            img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA))
+
+        parametros = {"nombre_local": "default",
+                             "puntos_local": 0,
+                             "nombre_visita": "default",
+                             "puntos_visita": 0,
+                             "frame": "",
+        }
+        for key in parametros:
+            parametros[key] = redis.get(str(evento_id) + "_" + key)
+
         with open(f'params_{evento_id}.txt', 'w') as f:
             f.write(str(parametros))
 
@@ -54,16 +83,17 @@ def proceso_en_segundo_plano(evento_id, parametros, eventos_creados):
         imagenes_textos = [
             # {'tipo': 'imagen', 'posicion': (100, 100), 'contenido': 'cpbm.png'},
             {'tipo': 'imagen', 'posicion': (int(1920/2)-int(928/2), 1080-158-50), 'contenido': 'sb.png'},
-            {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+85, 1080-158-40), 'contenido': {'texto': parametros["nombre_local"], 'color': 'white', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
-            {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+420, 1080-158-40), 'contenido': {'texto': parametros["nombre_visita"], 'color': 'white', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
-            {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+315, 1080-158-40), 'contenido': {'texto': str(parametros["puntos_local"]), 'color': 'black', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
-            {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+650, 1080-158-40), 'contenido': {'texto': str(parametros["puntos_visita"]), 'color': 'black', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
+            {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+85, 1080-158-40), 'contenido': {'texto': str(parametros["nombre_local"].decode()), 'color': 'white', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
+            {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+420, 1080-158-40), 'contenido': {'texto': str(parametros["nombre_visita"].decode()), 'color': 'white', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
+            {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+315, 1080-158-40), 'contenido': {'texto': str(parametros["puntos_local"].decode()), 'color': 'black', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
+            {'tipo': 'texto', 'posicion': (int(1920/2)-int(928/2)+650, 1080-158-40), 'contenido': {'texto': str(parametros["puntos_visita"].decode()), 'color': 'black', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}},
             {'tipo': 'texto', 'posicion': ((1920/2)-(928/2), 1080-50-75), 'contenido': {'texto': hora, 'color': 'white', 'fuente': 'arial.ttf', 'tamaño_fuente': 64}}
     ]
 
         imagen = Image.new('RGBA', resolucion, color_fondo + (0,))
         draw = ImageDraw.Draw(imagen)
-
+        imagen_overlay = img
+        imagen.paste(imagen_overlay, (0,0), mask=imagen_overlay)
         # Añadir imágenes y texto sobre la imagen base
         for item in imagenes_textos:
             tipo = item['tipo']
@@ -88,33 +118,37 @@ def proceso_en_segundo_plano(evento_id, parametros, eventos_creados):
                 draw.text(posicion, texto, fill=color, font=fuente)
 
         buffer = io.BytesIO()
-        imagen.save("img.png")
+        # imagen.save("img.png")
         imagen.save(buffer, format="PNG")
         buffer.seek(0)
 
-        try:
-            yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + buffer + b'\r\n')
-        except:
-            pass
+        parametros["frame"] = buffer.read()
 
-        time.sleep(0.1)
+        redis.set(str(evento_id) + "_frame", parametros["frame"])
+
+        # accumulated_frames.append(parametros["frame"])
+        # if len(accumulated_frames) >= batch_size:
+        #     batch_frame = b''.join(accumulated_frames)
+        #     ffmpeg_process.stdin.write(batch_frame)
+        #     accumulated_frames.clear()  # Limpiar la lista de frames acumulados
+        # time.sleep(0.1)
 
 @app.route('/crear_evento/<evento_id>', methods=['POST'])
 def crear_evento(evento_id):
     # time.sleep(10)
     if evento_id not in eventos:
-        manager = Manager()
-        parametros = manager.dict()
         parametros_nuevos = {"nombre_local": "default",
                              "puntos_local": 0,
                              "nombre_visita": "default",
                              "puntos_visita": 0,
+                             "frame": "",
                              }
+        for key in parametros_nuevos:
+            redis.set(str(evento_id) + "_" + key, parametros_nuevos[key])
+        # print(redis.get(evento_id))
         print("PID FLASK PADRE: " + str(os.getpid()))
-        proceso = Process(target=proceso_en_segundo_plano, args=(evento_id, parametros, eventos))
+        proceso = Process(target=proceso_en_segundo_plano, args=(evento_id, redis))
         proceso.start()
-        eventos[evento_id] = {"proceso": proceso, "parametros": parametros}
-        eventos[evento_id]["parametros"].update(parametros_nuevos)
         return jsonify({"mensaje": f"Evento {evento_id} creado correctamente"}), 200
     else:
         return jsonify({"error": "El evento ya existe"}), 400
@@ -140,15 +174,15 @@ def modificar_parametros(evento_id):
     
 @app.route('/sum_local/<evento_id>', methods=['POST'])
 def sum_local(evento_id):
-    if evento_id in eventos:
-        puntos_local = eventos[evento_id]["parametros"]["puntos_local"] + 1
-        parametros = {"puntos_local": puntos_local}
-        eventos[evento_id]["parametros"].update(parametros)
-        parametros = eventos[evento_id]["parametros"]
+    # if evento_id in eventos:
+        puntos_local = redis.get(evento_id +"_puntos_local")
+        puntos_local = int(puntos_local.decode())
+        puntos_local += 1
+        redis.set(evento_id +"_puntos_local", puntos_local)
         return jsonify({"mensaje": f"Parámetros del evento {evento_id} modificados correctamente"},
-                       {"Parametros": dict(parametros)}), 200
-    else:
-        return jsonify({"error": "El evento no existe"}), 404
+                       {"Parametros": str(puntos_local)}), 200
+    # else:
+    #     return jsonify({"error": "El evento no existe"}), 404
     
 @app.route('/rest_local/<evento_id>', methods=['POST'])
 def rest_local(evento_id):
