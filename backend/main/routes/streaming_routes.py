@@ -1,8 +1,8 @@
-from flask import Blueprint
+from flask import Blueprint, Response
 from flask import render_template
 from main.services.streaming_services import ( new_event_service, read_data_event , 
                                               play_event , pause_event, stop_event,
-                                              start_event)
+                                              generate_frames)
 
 streaming_bp = Blueprint('streaming', __name__, url_prefix='/streaming')
 
@@ -31,7 +31,8 @@ def stop(event_id):
     stop_event(event_id)
     return 'Streaming stoped'
 
-@streaming_bp.route('/start_event/<event_id>', methods=['POST'])
-def start(event_id):
-    start_event(event_id)
-    return 'Streaming stoped'
+
+@streaming_bp.route('/start_event/video_feed/<event_id>', methods=['GET'])
+def video_feed(event_id):
+    return Response(generate_frames(event_id), mimetype='multipart/x-mixed-replace; boundary=frame')
+
