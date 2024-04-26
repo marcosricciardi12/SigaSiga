@@ -1,0 +1,10 @@
+flask
+opencv-python
+flask_cors
+datetime
+pillow
+flask-restful
+flask-restplus
+redis
+python-dotenv
+shortuuid
