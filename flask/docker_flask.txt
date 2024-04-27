@@ -1,0 +1,52 @@
+Este sería el archivo: Dockerfile
+Asume que desde donde tengo el Dockerfile, tengo un directorio ./src donde está el código del microservicio hecho en flask
+
+
+ FROM alpine
+
+LABEL mantainer="diego.navarro@masterdealer.co"
+
+ENV TERM xterm
+
+RUN apk update
+RUN apk add python3 uwsgi uwsgi-python py3-pip curl jq bash
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community/ --allow-untrusted gnu-libiconv
+ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so iconv
+
+
+RUN mkdir /opt/myapp
+
+WORKDIR /opt/myapp
+COPY src/ /opt/myapp
+
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
+
+#USER 1000:1000
+
+CMD uwsgi --ini /opt/myapp/myapp.ini
+
+EXPOSE 5000
+
+
+En el mismo directorio ./src donde está el codigo fuente debería tener un archivo: myapp.ini que es el que utiliza uwsgi para configurarse
+ [uwsgi]
+
+plugins = /usr/lib/uwsgi/python
+chdir = /opt/myapp
+
+module = app
+callable = app
+
+protocol = http
+processes = 4
+threads = 2
+socket = 0.0.0.0:5000
+
+
+7:43
+Para mandar a construir esa imagen de docker deberían hacer dentro del mismo directorio donde esta el Dockerfile:
+docker build --rm -t myapp .
+Eso va a hacer una imagen de docker con el nombre: myapp
+Si lo quieren correr deberían ejecutar y poner el puerto local donde quedará expuesto y el puerto interno de la app:
+docker run -d --name myapp -p 5000:5000 

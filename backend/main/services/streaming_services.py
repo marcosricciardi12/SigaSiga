@@ -1,3 +1,4 @@
+import os
 from main import redis
 import shortuuid
 import cv2
@@ -82,6 +83,9 @@ def generate_frames(event_id):
     capture = cv2.VideoCapture(str(video_list[0]))
     transparent_image = Image.open('sb.png').convert('RGBA')
     alfa = 0
+    scoreboard = get_scoreboard(event_id)
+
+    print(os.getpid(), event_id, scoreboard)
     while True:
         scoreboard = get_scoreboard(event_id)
         ret, frame = capture.read()
@@ -111,7 +115,7 @@ def generate_frames(event_id):
         draw.text((939,930), scoreboard["visitor_team_short"] , fill="white", font=ImageFont.truetype("arial.ttf", 64))
         draw.text((1124,930), scoreboard["visitor_points"] , fill="black", font=ImageFont.truetype("arial.ttf", 64))
         canvas = canvas.convert('RGB')
-        canvas.save("img.jpeg")
+        # canvas.save("img.jpeg")
         # Convertir el lienzo a bytes
         # frame_bytes = canvas.tobytes("JPEG")
         buffer = io.BytesIO()

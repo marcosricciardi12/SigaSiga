@@ -1,1 +1,0 @@
-{'nombre_local': b'default', 'puntos_local': b'0', 'nombre_visita': b'default', 'puntos_visita': b'0', 'frame': b''}

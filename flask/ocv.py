@@ -3,7 +3,7 @@ import numpy as np
 
 # URL del video HTTP
 video_url = 'http://192.168.54.139:4747/video'
-
+# video_url = 'http://localhost:5000/video_feed'
 # Inicia la captura de video desde la URL
 cap = cv2.VideoCapture(video_url)
 

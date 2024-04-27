@@ -21,3 +21,13 @@ modprobe -r v4l2loopback
 v4l2-ctl --list-devices
 modprobe v4l2loopback devices=3 video_nr=8,9 exclusive_caps=1,1,1 card_label="Loopback-1,Loopback-2,Loopback-3"
 sudo modprobe snd-aloop
+
+docker run -d -p 6379:6379 redis
+
+ffmpeg -f v4l2 -i /dev/video2 -c:v libx264 -preset ultrafast -tune zerolatency -f flv rtmp://localhost/live/stream
+
+
+http://localhost:5000/streaming/start_event/video_feed/DhFvkbwfLKbMT7LZDpdF7h
+
+
+ffmpeg -i http://localhost:5000/streaming/start_event/video_feed/DhFvkbwfLKbMT7LZDpdF7h -c:v libx264 -preset ultrafast -tune zerolatency -f flv rtmp://localhost/live/stream

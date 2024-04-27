@@ -29,7 +29,7 @@ def generate_frames(evento_id):
             frame = read_frame
         # print(frame)
         try:
-            yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            yield (b'--frame\r\n' b'Content-Type: image/png\r\n\r\n' + frame + b'\r\n')
         except:
             pass
 
@@ -52,18 +52,40 @@ def proceso_en_segundo_plano(evento_id, redis):
     # ]
     # ffmpeg_process = subprocess.Popen(ffmpeg_cmd, stdin=subprocess.PIPE)
 
-    video_url = 'http://localhost:5001/video_feed'
-    cap = cv2.VideoCapture(video_url)
-    if not cap.isOpened():
-        print("Error: No se pudo abrir la captura de video.")
-        exit()
+    # video_url = 'http://192.168.54.139:4747/video'
+    # cap = cv2.VideoCapture(video_url)
+    # if not cap.isOpened():
+    #     print("Error: No se pudo abrir la captura de video.")
+    #     exit()
+
+    # ffmpeg_cmd_http = [
+    #     'ffmpeg',
+    #     '-i', 'http://192.168.54.139:4747/video',  # Reemplaza con tu fuente de video HTTP
+    #     '-f', 'image2pipe',
+    #     '-vf', 'fps=30',  # Captura un fotograma por segundo
+    #     '-pix_fmt', 'rgb24',
+    #     '-vcodec', 'rawvideo',
+    #     '-',
+    # ]
+    # process_http = subprocess.Popen(ffmpeg_cmd_http, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    process = subprocess.Popen([
+        'ffmpeg',
+        '-f', 'image2pipe',
+        '-i', 'pipe:',
+        '-f', 'v4l2',
+        '-vcodec', 'rawvideo',
+        '-pix_fmt', 'rgb24',
+        '-video_size', '1920x1080',
+        "/dev/video2"
+    ], stdin=subprocess.PIPE)
 
     while True:
-        ret, frame = cap.read()
-        if ret:
-            # Convierte el fotograma a una imagen en Pillow
-            img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA))
-
+        # ret, frame = cap.read()
+        # if ret:
+        #     # Convierte el fotograma a una imagen en Pillow
+        #     img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA))
+        # frame_http = process_http.stdout.read(640 * 480 * 3)
         parametros = {"nombre_local": "default",
                              "puntos_local": 0,
                              "nombre_visita": "default",
@@ -76,7 +98,7 @@ def proceso_en_segundo_plano(evento_id, redis):
         with open(f'params_{evento_id}.txt', 'w') as f:
             f.write(str(parametros))
 
-        color_fondo = (0, 0, 0)  # Color verde (RGB)
+        color_fondo = (0, 255, 0)  # Color verde (RGB)
         resolucion = (1920, 1080)
         hora = str(datetime.now().strftime("%H:%M:%S"))
         # print(hora)
@@ -92,9 +114,13 @@ def proceso_en_segundo_plano(evento_id, redis):
 
         imagen = Image.new('RGBA', resolucion, color_fondo + (0,))
         draw = ImageDraw.Draw(imagen)
-        imagen_overlay = img
-        imagen.paste(imagen_overlay, (0,0), mask=imagen_overlay)
+
+        # if frame_http:
+        #     imagen_overlay = Image.frombytes('RGB', (640, 480), frame_http)
+        #     imagen_overlay = imagen_overlay.convert("RGBA")
+        #     imagen.paste(imagen_overlay, (0,0), mask=imagen_overlay)
         # Añadir imágenes y texto sobre la imagen base
+
         for item in imagenes_textos:
             tipo = item['tipo']
             posicion = item['posicion']
@@ -118,12 +144,16 @@ def proceso_en_segundo_plano(evento_id, redis):
                 draw.text(posicion, texto, fill=color, font=fuente)
 
         buffer = io.BytesIO()
-        # imagen.save("img.png")
-        imagen.save(buffer, format="PNG")
+        imagen = imagen.convert("RGB")
+        imagen.save(buffer, format="JPEG")
         buffer.seek(0)
 
         parametros["frame"] = buffer.read()
+        process.stdin.write(parametros["frame"])
+        process.stdin.flush()
 
+
+        time.sleep(1 / 30)
         redis.set(str(evento_id) + "_frame", parametros["frame"])
 
         # accumulated_frames.append(parametros["frame"])
