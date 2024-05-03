@@ -7,77 +7,69 @@ from PIL import Image, ImageDraw, ImageFont
 import io
 import ast
 
-event = {
-    "sport" : "",
-    "video_sources" : str([]),
-    "audio_sources" : str([]),
-    "start": int(False),
-    "play": int(False),
-    "stop": int(False),
-}
+from main import sports, sports_name_list
+from main.models.event import event
+from main.services.scoreboard_services import get_scoreboard
 
-scoreboards = {
-    "basquet": {
-        "local_team": "",
-        "local_team_short": "",
-        "local_points": 0,
-        "local_fouls": 0,
-        "visitor_team": "",
-        "visitor_team_short": "",
-        "visitor_points": 0,
-        "visitor_fouls": 0,
-        "period": 0,
-        "time": 0,
-        "24time": 0,
-        "play_time": int(False),
-        "play_24time": int(False)
-    }
-}
 
-def new_event_service():
+
+def new_event_service(sport_id):
+    sport_id = int(sport_id)
+    selected_sport = sports_name_list[sport_id]
     event_id = str(shortuuid.uuid())
+
+    sport = sports[sport_id]
+    print(sport)
     for key in event:
-        redis.set(f'{event_id}_{key}', event[key])
-    return event_id
+        redis.set(f'{event_id}-{key}', event[key])
+    redis.set(f'{event_id}-event_id', event_id)
+    redis.set(f'{event_id}-sport', selected_sport)
+    redis.set(f'{event_id}-sport_id', sport_id)
+
+    for name_sport in sport:
+        # print(name_sport)
+        for type_info in sport[name_sport]:
+            # print(type_info)
+            # print(sport[name_sport][type_info])
+            for attribute in sport[name_sport][type_info]:
+                # print(attribute)
+                redis.set(f'{event_id}-{type_info}-{attribute}', sport[name_sport][type_info][attribute])
+    return read_data_event(event_id)
 
 def read_data_event(event_id):
     for key in event:
-        event[key] = redis.get(f'{event_id}_{key}')
+        event[key] = redis.get(f'{event_id}-{key}')
+        event[key] = event[key].decode('utf-8')
     return event
 
 def play_event(event_id):
     value = int(True)
-    redis.set(f'{event_id}_play', value)
+    redis.set(f'{event_id}-play', value)
     return "done"
 
 def pause_event(event_id):
     value = int(False)
-    redis.set(f'{event_id}_play', value)
+    redis.set(f'{event_id}-play', value)
     return "done"
 
 #cambio stop a True, matara al streaming
 def stop_event(event_id):
     value = int(True)
-    redis.set(f'{event_id}_stop', value)
+    redis.set(f'{event_id}-stop', value)
     return "done"
 
 #Implementar logica para comenzar stream
 def start_event():
     event_id = str(shortuuid.uuid())
     for key in event:
-        redis.set(f'{event_id}_{key}', event[key])
+        redis.set(f'{event_id}-{key}', event[key])
     return "done"
 
-def get_scoreboard(event_id):
-    deporte = redis.get(f'{event_id}_sport')
-    deporte = deporte.decode("utf-8")
-    scoreboard = scoreboards[deporte]
-    for key in scoreboard:
-       scoreboard[key] = redis.get(f'{event_id}_{key}').decode("utf-8")
-    return scoreboard
+def get_sports_list():
+    return {int(i): valor for i, valor in enumerate(sports_name_list)}
 
 def generate_frames(event_id):
-    video_list = redis.get(f'{event_id}_video_sources')
+    video_list = redis.get(f'{event_id}-video_sources')
     bytes_video_list = video_list.decode('utf-8')
     video_list = ast.literal_eval(bytes_video_list)
     capture = cv2.VideoCapture(str(video_list[0]))

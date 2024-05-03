@@ -1,8 +1,11 @@
 from flask import Flask
 from main.config import Config
 from redis import Redis
+from main.starts.load_sports import load_sports
 
 redis = Redis()
+sports, sports_name_list = load_sports()
+
 
 def create_app():
     app = Flask(__name__)
