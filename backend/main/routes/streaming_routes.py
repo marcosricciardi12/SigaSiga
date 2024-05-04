@@ -38,7 +38,7 @@ def stop(event_id):
     return 'Streaming stoped'
 
 
-@streaming_bp.route('/start_event/video_feed/<event_id>', methods=['GET'])
+@streaming_bp.route('/video_feed/<event_id>', methods=['GET'])
 def video_feed(event_id):
     return Response(generate_frames(event_id), mimetype='multipart/x-mixed-replace; boundary=frame')
 
