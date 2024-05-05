@@ -7,4 +7,6 @@ event = {
     "start": int(False),
     "play": int(False),
     "stop": int(False),
+    "interrupt_flag": int(False),
+    "selected_video_soruce": 0,
 }

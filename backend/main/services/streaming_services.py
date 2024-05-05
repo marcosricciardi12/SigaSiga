@@ -72,13 +72,23 @@ def generate_frames(event_id):
     video_list = redis.get(f'{event_id}-video_sources')
     bytes_video_list = video_list.decode('utf-8')
     video_list = ast.literal_eval(bytes_video_list)
-    capture = cv2.VideoCapture(str(video_list[0]))
+    capture_list = []
+    for video_source in video_list:
+        # print(video_source)
+        capture_list.append(cv2.VideoCapture(str(video_source)))
+    # capture = cv2.VideoCapture(str(video_list[0]))
     transparent_image = Image.open('sb.png').convert('RGBA')
     alfa = 0
-    scoreboard = get_scoreboard(event_id)
-
+    # scoreboard = get_scoreboard(event_id)
+    # capture = capture_list[0]
     print(os.getpid(), event_id, scoreboard)
     while True:
+        if int(redis.get(f'{event_id}-interrupt_flag')):
+            redis.set(f'{event_id}-interrupt_flag', int(False))
+            index = int(redis.get(f'{event_id}-selected_video_soruce'))
+            capture = capture_list[index]
+            print(index)
+
         scoreboard = get_scoreboard(event_id)
         ret, frame = capture.read()
         # transparent_image.putalpha(int(alfa))
@@ -118,3 +128,7 @@ def generate_frames(event_id):
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + buffer.read() + b'\r\n')
 
+def change_video_source(event_id, camera_index):
+    redis.set(f'{event_id}-interrupt_flag', int(True))
+    redis.set(f'{event_id}-selected_video_soruce', int(camera_index))
+    pass
