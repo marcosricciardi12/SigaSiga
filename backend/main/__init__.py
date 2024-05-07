@@ -14,9 +14,12 @@ def create_app():
     from main.routes.config_routes import config_bp
     from main.routes.scoreboard_routes import scoreboard_bp
     from main.routes.streaming_routes import streaming_bp
-
+    from main.routes.video_sources_routes import video_source_bp
+    
     app.register_blueprint(config_bp)
     app.register_blueprint(scoreboard_bp)
     app.register_blueprint(streaming_bp)
+    app.register_blueprint(video_source_bp)
+
 
     return app

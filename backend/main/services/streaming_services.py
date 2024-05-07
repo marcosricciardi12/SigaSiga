@@ -6,6 +6,7 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import io
 import ast
+import numpy as np
 
 from main import sports, sports_name_list
 from main.models.event import event
@@ -69,34 +70,32 @@ def get_sports_list():
     return {int(i): valor for i, valor in enumerate(sports_name_list)}
 
 def generate_frames(event_id):
-    video_list = redis.get(f'{event_id}-video_sources')
-    bytes_video_list = video_list.decode('utf-8')
-    video_list = ast.literal_eval(bytes_video_list)
-    capture_list = []
-    for video_source in video_list:
-        # print(video_source)
-        capture_list.append(cv2.VideoCapture(str(video_source)))
-    # capture = cv2.VideoCapture(str(video_list[0]))
+    video_source_index = int(redis.get(f'{event_id}-selected_video_soruce'))
+    key_video_source = f'{event_id}-video_sources-{str(video_source_index)}'
     transparent_image = Image.open('sb.png').convert('RGBA')
     alfa = 0
-    # scoreboard = get_scoreboard(event_id)
+    scoreboard = get_scoreboard(event_id)
     # capture = capture_list[0]
     print(os.getpid(), event_id, scoreboard)
     while True:
         if int(redis.get(f'{event_id}-interrupt_flag')):
             redis.set(f'{event_id}-interrupt_flag', int(False))
-            index = int(redis.get(f'{event_id}-selected_video_soruce'))
-            capture = capture_list[index]
-            print(index)
+            video_source_index = int(redis.get(f'{event_id}-selected_video_soruce'))
+            key_video_source = f'{event_id}-video_sources-{str(video_source_index)}'
+            print(video_source_index)
+
+        frame_bytes = redis.get(key_video_source)
+
+        # if frame_bytes:
+        #     # Convertir los bytes del frame a formato de imagen
+        nparr = np.frombuffer(frame_bytes, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
         scoreboard = get_scoreboard(event_id)
-        ret, frame = capture.read()
         # transparent_image.putalpha(int(alfa))
         # if alfa >=255:
         #     alfa = 0
         # alfa += 1
-        if not ret:
-            continue
         
         # Convertir el frame de OpenCV a Pillow
         pillow_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
