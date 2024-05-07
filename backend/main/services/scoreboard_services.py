@@ -6,6 +6,7 @@ def add_point_team(event_id, team, points):
     team_points = redis.get(f'{event_id}-scoreboard-{team}_points')
     team_points = int(team_points)
     team_points += int(points)
+    if team_points < 0 : team_points = 0
     redis.set(f'{event_id}-scoreboard-{team}_points', team_points)
     return str(team_points)
 
@@ -13,7 +14,7 @@ def sub_point_team(event_id, team, points):
     team_points = redis.get(f'{event_id}-scoreboard-{team}_points')
     team_points = int(team_points)
     team_points -= int(points)
-    if team_points < 0: team_points=0
+    if team_points < 0 : team_points = 0
     redis.set(f'{event_id}-scoreboard-{team}_points', team_points)
     return str(team_points)
 
