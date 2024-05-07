@@ -1,4 +1,5 @@
 import os
+import time
 from main import redis
 import shortuuid
 import cv2
@@ -78,6 +79,7 @@ def generate_frames(event_id):
     # capture = capture_list[0]
     print(os.getpid(), event_id, scoreboard)
     while True:
+        start_time = time.time()
         if int(redis.get(f'{event_id}-interrupt_flag')):
             redis.set(f'{event_id}-interrupt_flag', int(False))
             video_source_index = int(redis.get(f'{event_id}-selected_video_soruce'))
@@ -126,6 +128,11 @@ def generate_frames(event_id):
         # Generar el frame para la fuente de video HTTP
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + buffer.read() + b'\r\n')
+        end_time = time.time()
+
+        # # Calcular el tiempo transcurrido
+        elapsed_time = end_time - start_time
+        print("Tiempo procesamiento p/frame: " + str(elapsed_time))
 
 def change_video_source(event_id, camera_index):
     redis.set(f'{event_id}-interrupt_flag', int(True))
