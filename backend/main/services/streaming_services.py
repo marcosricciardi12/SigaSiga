@@ -58,7 +58,7 @@ def pause_event(event_id):
 def stop_event(event_id):
     value = int(True)
     redis.set(f'{event_id}-stop', value)
-    return "done"
+    return {f'{event_id} Stopped': bool(redis.get(f'{event_id}-stop'))}
 
 #Implementar logica para comenzar stream
 def start_event():
@@ -78,7 +78,7 @@ def generate_frames(event_id):
     scoreboard = get_scoreboard(event_id)
     # capture = capture_list[0]
     print(os.getpid(), event_id, scoreboard)
-    while True:
+    while not int(redis.get(f'{event_id}-stop')):
         start_time = time.time()
         if int(redis.get(f'{event_id}-interrupt_flag')):
             redis.set(f'{event_id}-interrupt_flag', int(False))

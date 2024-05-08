@@ -11,9 +11,9 @@ def add_video_source(video_source, event_id):
     video_list.append(video_source)
     video_index = len(video_list) - 1
     redis.set(f'{event_id}-video_sources', str(video_list))
-    video_soruce_key = f'{event_id}-video_sources-{str(video_index)}'
-    print(video_soruce_key)
-    video_capture_process = mp.Process(target = capture_video_source, args = (redis, video_soruce_key, video_source))
+    video_source_key = f'{event_id}-video_sources-{str(video_index)}'
+    print(video_source_key)
+    video_capture_process = mp.Process(target = capture_video_source, args = (redis, video_source_key, video_source, event_id))
     video_capture_process.start()
     return {"video_source_list": video_list}
 

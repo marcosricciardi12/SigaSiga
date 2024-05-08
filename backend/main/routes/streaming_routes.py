@@ -34,8 +34,7 @@ def pause(event_id):
 
 @streaming_bp.route('/stop_event/<event_id>', methods=['POST'])
 def stop(event_id):
-    stop_event(event_id)
-    return 'Streaming stoped'
+    return stop_event(event_id)
 
 
 @streaming_bp.route('/video_feed/<event_id>', methods=['GET'])
