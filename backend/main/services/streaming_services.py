@@ -6,13 +6,11 @@ import cv2
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import io
-import ast
 import numpy as np
-
 from main import sports, sports_name_list
 from main.models.event import event
 from main.services.scoreboard_services import get_scoreboard
-
+import main.modules.remove_redis_data as remove_redis_data
 
 
 def new_event_service(sport_id):
@@ -58,7 +56,8 @@ def pause_event(event_id):
 def stop_event(event_id):
     value = int(True)
     redis.set(f'{event_id}-stop', value)
-    return {f'{event_id} Stopped': bool(redis.get(f'{event_id}-stop'))}
+    remove_redis_data.delete_event(event_id)
+    return {f'{event_id} Status': "Stopped and removed"}
 
 #Implementar logica para comenzar stream
 def start_event():
@@ -79,10 +78,10 @@ def generate_frames(event_id):
     # capture = capture_list[0]
     print(os.getpid(), event_id, scoreboard)
     while not int(redis.get(f'{event_id}-stop')):
-        start_time = time.time()
+        # start_time = time.time()
         if int(redis.get(f'{event_id}-interrupt_flag')):
             redis.set(f'{event_id}-interrupt_flag', int(False))
-            video_source_index = int(redis.get(f'{event_id}-selected_video_soruce'))
+            video_source_index = int(redis.get(f'{event_id}-selected_video_source'))
             key_video_source = f'{event_id}-video_sources-{str(video_source_index)}'
             print(video_source_index)
 
@@ -131,8 +130,8 @@ def generate_frames(event_id):
         end_time = time.time()
 
         # # Calcular el tiempo transcurrido
-        elapsed_time = end_time - start_time
-        print("Tiempo procesamiento p/frame: " + str(elapsed_time))
+        # elapsed_time = end_time - start_time
+        # print("Tiempo procesamiento p/frame: " + str(elapsed_time))
 
 def change_video_source(event_id, camera_index):
     redis.set(f'{event_id}-interrupt_flag', int(True))

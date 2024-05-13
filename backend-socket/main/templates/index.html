@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar Peticiones HTTP y Frames de Video</title>
+</head>
+<body>
+    <h1>Enviar Peticiones HTTP y Frames de Video</h1>
+    <label for="urlInput">URL de la Fuente de Video:</label>
+    <input type="text" id="urlInput" placeholder="http://direccion_ip:puerto/video">
+    <button onclick="startStreaming()">Iniciar Streaming</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+    <script src="{{url_for('static', filename='app.js')}}"></script>
+</body>
+</html>

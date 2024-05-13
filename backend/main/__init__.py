@@ -10,7 +10,9 @@ sports, sports_name_list = load_sports()
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    
     app.redis = redis
+
     from main.routes.config_routes import config_bp
     from main.routes.scoreboard_routes import scoreboard_bp
     from main.routes.streaming_routes import streaming_bp
