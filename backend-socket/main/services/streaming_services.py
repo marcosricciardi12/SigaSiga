@@ -124,9 +124,11 @@ def generate_frames(event_id):
         # imagen.save("test_frame.png")
         canvas.save(buffer, format="JPEG")
         buffer.seek(0)
+        video_frame = buffer.read()
+        redis.set(f'{event_id}-video_frame', video_frame)
         # Generar el frame para la fuente de video HTTP
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + buffer.read() + b'\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + video_frame + b'\r\n')
         end_time = time.time()
 
         # # Calcular el tiempo transcurrido

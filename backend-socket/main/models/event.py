@@ -9,4 +9,5 @@ event = {
     "stop": int(False),
     "interrupt_flag": int(False),
     "selected_video_source": 0,
+    "video_frame": "",
 }
