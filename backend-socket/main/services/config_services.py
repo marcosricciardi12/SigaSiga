@@ -1,7 +1,7 @@
 from main import redis
 from main import sports_name_list
 import ast
-from main.modules.capture_video_redis import capture_video_source
+from main.modules.capture_http_video_redis import capture_video_source
 import multiprocessing as mp
 
 def add_video_source(video_source, event_id):
