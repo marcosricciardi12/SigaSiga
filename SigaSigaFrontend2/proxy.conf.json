@@ -1,0 +1,10 @@
+{
+    "/api": {
+      "target": "http://localhost:8000",
+      "secure": false
+    },
+    "/socket": {
+      "target": "http://192.168.54.198:5000",
+      "secure": false
+    }
+  }

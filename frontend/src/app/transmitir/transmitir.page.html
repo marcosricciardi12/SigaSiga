@@ -1,0 +1,16 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Transmitir</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleCaptura()">
+        {{ capturando ? 'Detener' : 'Iniciar' }} Captura
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="video-container">
+    <video #videoElement autoplay></video>
+  </div>
+</ion-content>

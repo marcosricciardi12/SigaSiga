@@ -1,0 +1,27 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      Transmitir
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Video container -->
+  <div class="video-container">
+    <video #videoElement autoplay playsinline></video>
+  </div>
+
+  <!-- Start message container -->
+  <div class="start-message" *ngIf="!capturing">
+    <p>Pulse para iniciar Transmisión</p>
+    <ion-icon name="arrow-down"></ion-icon>
+  </div>
+
+  <!-- Button container -->
+  <div class="button-container">
+    <ion-button [color]="capturing ? 'danger' : 'medium'" (click)="toggleCapture()" shape="round">
+      <ion-icon name="{{ capturing ? 'square' : 'ellipse' }}"></ion-icon>
+    </ion-button>
+  </div>
+</ion-content>

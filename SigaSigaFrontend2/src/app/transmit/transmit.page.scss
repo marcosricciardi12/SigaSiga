@@ -1,0 +1,61 @@
+.video-container {
+    position: absolute;
+    top: 0px; /* Altura de la barra superior de navegación */
+    left: 0;
+    right: 0;
+    bottom: 0px; /* Altura del botón más un poco de espacio */
+    overflow: hidden; /* Para que el video no se desborde sobre el botón */
+  }
+  
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .button-container {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+  }
+  
+  ion-button {
+    --border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    --background: var(--ion-color-light);
+    --box-shadow: none;
+    --padding-end: 0;
+    --padding-start: 0;
+    --padding-bottom: 0;
+    --padding-top: 0;
+  }
+  
+  ion-icon {
+    font-size: 32px;
+  }
+
+ /* Estilos anteriores ... */
+
+.start-message {
+    position: absolute;
+    top: 50%; /* Centra verticalmente */
+    left: 50%; /* Centra horizontalmente */
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .start-message p {
+    margin-bottom: 10px;
+  }
+  
+  .start-message ion-icon {
+    font-size: 24px;
+  }
+  
+  
