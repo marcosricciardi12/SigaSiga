@@ -3,6 +3,7 @@ from flask import render_template
 from main.services.streaming_services import ( new_event_service, read_data_event , 
                                               play_event , pause_event, get_sports_list,
                                               stop_event, change_video_source, generate_frames)
+from flask_jwt_extended import jwt_required
 
 streaming_bp = Blueprint('streaming', __name__, url_prefix='/streaming')
 
@@ -32,9 +33,11 @@ def pause(event_id):
     pause_event(event_id)
     return 'Streaming paused'
 
-@streaming_bp.route('/stop_event/<event_id>', methods=['POST'])
-def stop(event_id):
-    return stop_event(event_id)
+
+@streaming_bp.route('/stop_event', methods=['POST'])
+@jwt_required(optional=True)
+def stop():
+    return stop_event()
 
 
 @streaming_bp.route('/video_feed/<event_id>', methods=['GET'])

@@ -1,3 +1,4 @@
+import base64
 import os
 import time
 from main import redis
@@ -11,12 +12,21 @@ from main import sports, sports_name_list
 from main.models.event import event
 from main.services.scoreboard_services import get_scoreboard
 import main.modules.remove_redis_data as remove_redis_data
-
+from flask import jsonify
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+import uuid
 
 def new_event_service(sport_id):
+
+    user_id = str(uuid.uuid4())  # Generar un user_id aleatorio
+    redis.set(f"user-{user_id}", user_id)
+    redis.set(f"user-{user_id}-role", "creator")
+
+
     sport_id = int(sport_id)
     selected_sport = sports_name_list[sport_id]
     event_id = str(shortuuid.uuid())
+    redis.set(f"user-{user_id}-id_event", event_id)
 
     sport = sports[sport_id]
     print(sport)
@@ -25,6 +35,10 @@ def new_event_service(sport_id):
     redis.set(f'{event_id}-event_id', event_id)
     redis.set(f'{event_id}-sport', selected_sport)
     redis.set(f'{event_id}-sport_id', sport_id)
+    redis.set(f'{event_id}-creator_user_id', user_id)
+    user_identity = {"user_id": user_id}
+    access_token = create_access_token(identity=user_identity)
+    redis.set(f"user-{user_id}-token", access_token)
 
     for name_sport in sport:
         # print(name_sport)
@@ -34,7 +48,8 @@ def new_event_service(sport_id):
             for attribute in sport[name_sport][type_info]:
                 # print(attribute)
                 redis.set(f'{event_id}-{type_info}-{attribute}', sport[name_sport][type_info][attribute])
-    return read_data_event(event_id)
+    # return read_data_event(event_id)
+    return {"token": access_token, "event_id": event_id}
 
 def read_data_event(event_id):
     for key in event:
@@ -53,10 +68,14 @@ def pause_event(event_id):
     return "done"
 
 #cambio stop a True, matara al streaming
-def stop_event(event_id):
+def stop_event():
+    current_user = get_jwt_identity()
+    current_user = current_user['user_id']
+    key = f"user-{current_user}-id_event"
+    event_id = (redis.get(key)).decode('utf-8')
     value = int(True)
     redis.set(f'{event_id}-stop', value)
-    remove_redis_data.delete_event(event_id)
+    remove_redis_data.delete_event(event_id, current_user)
     return {f'{event_id} Status': "Stopped and removed"}
 
 #Implementar logica para comenzar stream
@@ -67,11 +86,15 @@ def start_event():
     return "done"
 
 def get_sports_list():
-    return {int(i): valor for i, valor in enumerate(sports_name_list)}
+    list_dict_deportes = []
+    for index, sport in enumerate(sports_name_list):
+        list_dict_deportes.append({"id": index, "sport": sport})
+    return jsonify({"sports": [sport for sport in list_dict_deportes]})
 
 def generate_frames(event_id):
     video_source_index = int(redis.get(f'{event_id}-selected_video_source'))
     key_video_source = f'{event_id}-video_sources-{str(video_source_index)}'
+    key_video_source = "EDNTULjGHH6HvKFhBDUEpF-video_sources-6f6f673a-635d-4cb2-a162-bd69deca3949"
     transparent_image = Image.open('sb.png').convert('RGBA')
     alfa = 0
     scoreboard = get_scoreboard(event_id)
@@ -83,15 +106,16 @@ def generate_frames(event_id):
             redis.set(f'{event_id}-interrupt_flag', int(False))
             video_source_index = int(redis.get(f'{event_id}-selected_video_source'))
             key_video_source = f'{event_id}-video_sources-{str(video_source_index)}'
+            
             print(video_source_index)
 
-        frame_bytes = redis.get(key_video_source)
-
-        # if frame_bytes:
-        #     # Convertir los bytes del frame a formato de imagen
-        nparr = np.frombuffer(frame_bytes, np.uint8)
-        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
+        # frame_bytes = redis.get(key_video_source)
+        # # if frame_bytes:
+        # #     # Convertir los bytes del frame a formato de imagen
+        # nparr = np.frombuffer(frame_bytes, np.uint8)
+        # frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        frame = get_frame_from_redis(key_video_source)
         scoreboard = get_scoreboard(event_id)
         # transparent_image.putalpha(int(alfa))
         # if alfa >=255:
@@ -139,3 +163,19 @@ def change_video_source(event_id, camera_index):
     redis.set(f'{event_id}-interrupt_flag', int(True))
     redis.set(f'{event_id}-selected_video_soruce', int(camera_index))
     pass
+
+def get_frame_from_redis(key):
+    # Obtener el frame almacenado en Redis
+    encoded_frame = redis.get(key)
+    if encoded_frame is None:
+        print("No frame found in Redis for the given key.")
+        return None
+
+    # Decodificar el frame de base64
+    webp_frame = base64.b64decode(encoded_frame)
+
+    # Convertir los bytes del frame WebP a una matriz de imagen que OpenCV pueda usar
+    image_array = np.frombuffer(webp_frame, dtype=np.uint8)
+    image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+    return image

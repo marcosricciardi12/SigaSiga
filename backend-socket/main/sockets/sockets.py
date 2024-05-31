@@ -3,19 +3,30 @@ import time
 from flask_socketio import SocketIO
 from flask import request
 from main import redis
+import jwt
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+
 socketio = SocketIO()
+
+leftover_bytes = b''
 
 # @socketio.on('connect')
 # def handle_connect():
 #     client_id = request.sid
-#     print('Conexión establecida con:', client_id)
-
-leftover_bytes = b''
+#     print('Conexión establecida con: ' , client_id)
 
 @socketio.on('connect')
-def handle_connect():
-    client_id = request.sid
-    print('Conexión establecida con: ' , client_id)
+def connect():
+    token = request.args.get('token')
+    try:
+        jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
+        print('Usuario conectado')
+    except jwt.ExpiredSignatureError:
+        print('Token expirado')
+        return False
+    except jwt.InvalidTokenError:
+        print('Token inválido')
+        return False
 
 @socketio.on('send_parameters')
 def handle_parameters(data):
@@ -125,6 +136,22 @@ def handle_frame(frame):
 @socketio.on('frame')
 def handle_frame_from_client(data):
     global leftover_bytes
+    token = request.args.get('token')
+    token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
+    user_identity = token_decode['sub']['user_id']
+    event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
+    video_source_key = f'{event_id}-video_sources-{user_identity}'
+    # print(video_source_key)
+    try:
+        pass
+        # print('Usuario valido: ', user_identity, ' Evento ID: ', event_id)
+        
+    except jwt.ExpiredSignatureError:
+        print('Token expirado')
+        return False
+    except jwt.InvalidTokenError:
+        print('Token inválido')
+        return False
     try:
         # Decodificar el frame base64 recibido
         frame_data_bytes = base64.b64decode(data)
@@ -153,10 +180,9 @@ def handle_frame_from_client(data):
             webp_frame = frame_bytes[start_index:next_start_index]
 
             # Guardar el frame WebP en Redis
-            redis_key = "video_frame"
-            redis.set(redis_key, base64.b64encode(webp_frame))
-
-            # print("Frame guardado correctamente")
+            redis.set(video_source_key, base64.b64encode(webp_frame))
+            print(video_source_key)
+            print("Frame guardado correctamente")
 
     except Exception as e:
         print("Error al procesar el frame:", e)
