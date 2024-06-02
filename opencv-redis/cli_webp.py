@@ -23,8 +23,9 @@ def get_frame_from_redis(key):
     return image
 
 def main():
-    video_source_key = "video_frame"
-    
+    video_source_key = "HGxwWW4HEKjmuVecjUgFds-video_frame"
+        
+
     while True:
         # Obtener el frame desde Redis
         frame = get_frame_from_redis(video_source_key)

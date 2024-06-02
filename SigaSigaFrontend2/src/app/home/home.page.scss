@@ -1,0 +1,74 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  ion-button {
+    --background: transparent;
+    --border-radius: 50%;
+    --border-color: lightblue;
+    --border-width: 2px;
+    --color: lightblue;
+    width: 400;
+    height: 400;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 200px;
+  }
+  
+  ion-button ion-icon {
+    font-size: 100px; /* Aumenta el tamaño del ícono */
+  }
+  .button-text {
+    margin-top: 10px;
+    font-size: 30px;
+    color: lightblue;
+    text-align: center;
+  }
+
+  ion-select {
+  display: block;
+  margin: 0 auto;
+  max-width: 300px; /* Ajusta el ancho máximo según sea necesario */
+}
+
+.select-sport-text {
+    margin-top: 10px;
+    font-size: 20px;
+    color: white;
+    text-align: center;
+}
+
+/* Estilos para el borde de color azul claro */
+.select-border {
+  border: 3px solid lightblue; /* Cambia lightblue al color azul claro deseado */
+  border-radius: 8px; /* Ajusta el radio del borde según sea necesario */
+  margin-top: 10px;
+  width: 300px;
+  padding: 4px; /* Añade espacio interno alrededor del cuadro de selección */
+  font-size: 20px;
+}
+
+.select-text {
+  color: white; /* Cambia 'black' al color deseado para el texto */
+  font-size: 20px;
+  text-align: center;
+}
+.custom-select-popover {
+  color: white; /* Cambia 'black' al color deseado para el texto */
+  font-size: 15px;
+  text-align: center;
+}
+.custom-select-popover .select-text {
+  text-align: center;
+  padding: 8px; /* Ajusta el relleno según sea necesario */
+}

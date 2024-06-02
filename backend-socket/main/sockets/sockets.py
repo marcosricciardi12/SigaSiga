@@ -140,7 +140,7 @@ def handle_frame_from_client(data):
     token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
     user_identity = token_decode['sub']['user_id']
     event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
-    video_source_key = f'{event_id}-video_sources-{user_identity}'
+    video_source_key = f'{event_id}-socket_video_sources-{user_identity}'
     # print(video_source_key)
     try:
         pass

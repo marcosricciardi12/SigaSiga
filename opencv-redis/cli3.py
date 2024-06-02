@@ -11,10 +11,12 @@ def base64_to_image(base64_string):
     image = cv2.imdecode(decoded_data, cv2.IMREAD_COLOR)
     return image
 
+
 if __name__ == '__main__':
     # Leer el fotograma desde Redis
     while True:
-        frame_data = redis_client.get('video_frame')
+        frame_data = redis_client.get('HGxwWW4HEKjmuVecjUgFds-video_frame') #bytes
+        print(frame_data[:30])
         if frame_data is not None:
             # Convertir el fotograma de base64 a imagen
             frame_image = base64_to_image(frame_data)

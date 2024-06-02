@@ -1,0 +1,19 @@
+<ion-content class="ion-padding">
+  <div class="container">
+    <div class="button-container">
+      <ion-button (click)="handleButtonClick()">
+        <ion-icon slot="icon-only" name="play-circle-outline"></ion-icon>
+      </ion-button>
+      <div class="button-text">¡Comenzar nuevo evento!</div>
+      <div item-content class="select-sport-text">Seleccionar deporte</div>
+      <div class="select-border">
+        <ion-select [(ngModel)]="selectedSport" interfaceOptions="{cssClass: 'custom-select-popover'}">
+          <ion-select-option *ngFor="let sport of sports" [value]="sport">
+            {{ sport.sport }}
+          </ion-select-option>
+        </ion-select>
+      </div>
+      
+    </div>
+  </div>
+</ion-content>

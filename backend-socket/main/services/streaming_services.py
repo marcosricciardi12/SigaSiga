@@ -11,12 +11,24 @@ import numpy as np
 from main import sports, sports_name_list
 from main.models.event import event
 from main.services.scoreboard_services import get_scoreboard
+from main.modules.final_video import generate_final_video
+from main.modules.emit_youtube import emit_to_youtube
 import main.modules.remove_redis_data as remove_redis_data
 from flask import jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import uuid
+import ast
+import multiprocessing as mp
+
 
 def new_event_service(sport_id):
+
+    wait_image_path = 'main/static/wait.jpg'
+
+# Leer la imagen usando OpenCV
+    wait_image = cv2.imread(wait_image_path, cv2.IMREAD_UNCHANGED)
+    _, image_encoded = cv2.imencode('.jpeg', wait_image)
+    image_bytes = base64.b64encode(image_encoded.tobytes())
 
     user_id = str(uuid.uuid4())  # Generar un user_id aleatorio
     redis.set(f"user-{user_id}", user_id)
@@ -40,6 +52,8 @@ def new_event_service(sport_id):
     access_token = create_access_token(identity=user_identity)
     redis.set(f"user-{user_id}-token", access_token)
 
+    redis.set(f'{event_id}-socket_video_sources-waiting', image_bytes)
+
     for name_sport in sport:
         # print(name_sport)
         for type_info in sport[name_sport]:
@@ -49,6 +63,10 @@ def new_event_service(sport_id):
                 # print(attribute)
                 redis.set(f'{event_id}-{type_info}-{attribute}', sport[name_sport][type_info][attribute])
     # return read_data_event(event_id)
+
+    final_video_process = mp.Process(target = generate_final_video, args = (redis, event_id))
+    final_video_process.start()
+
     return {"token": access_token, "event_id": event_id}
 
 def read_data_event(event_id):
@@ -91,10 +109,59 @@ def get_sports_list():
         list_dict_deportes.append({"id": index, "sport": sport})
     return jsonify({"sports": [sport for sport in list_dict_deportes]})
 
-def generate_frames(event_id):
-    video_source_index = int(redis.get(f'{event_id}-selected_video_source'))
-    key_video_source = f'{event_id}-video_sources-{str(video_source_index)}'
-    key_video_source = "EDNTULjGHH6HvKFhBDUEpF-video_sources-6f6f673a-635d-4cb2-a162-bd69deca3949"
+def generate_frames(current_user):
+    
+    key = f"user-{current_user}-id_event"
+    event_id = (redis.get(key)).decode('utf-8')
+
+    try:
+        while not int(redis.get(f'{event_id}-stop')):
+            video_frame = redis.get(f'{event_id}-video_frame')
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + video_frame + b'\r\n')
+            
+    except:
+        print("End generate frames")
+
+def change_video_source(event_id, camera_index):
+    redis.set(f'{event_id}-interrupt_flag', int(True))
+    redis.set(f'{event_id}-selected_video_source', int(camera_index))
+    pass
+
+def change_socket_video_source(video_index):
+    current_user = get_jwt_identity()
+    current_user = current_user['user_id']
+    key = f"user-{current_user}-id_event"
+    event_id = (redis.get(key)).decode('utf-8')
+    redis.set(f'{event_id}-interrupt_flag', int(True))
+    redis.set(f'{event_id}-selected_socket_video_source', int(video_index))
+    pass
+
+def get_frame_from_redis(key):
+    # Obtener el frame almacenado en Redis
+    encoded_frame = redis.get(key)
+    if encoded_frame is None:
+        print("No frame found in Redis for the given key.")
+        return None
+
+    # Decodificar el frame de base64
+    webp_frame = base64.b64decode(encoded_frame)
+
+    # Convertir los bytes del frame WebP a una matriz de imagen que OpenCV pueda usar
+    image_array = np.frombuffer(webp_frame, dtype=np.uint8)
+    image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
+    return image
+
+def get_redis_frame(event_id):
+    video_source_index = int(redis.get(f'{event_id}-selected_socket_video_source'))
+    video_list = redis.get(f'{event_id}-socket_video_sources')
+    bytes_video_list = video_list.decode('utf-8')
+    video_list = ast.literal_eval(bytes_video_list)
+    print(video_list)
+    key_user_video_source = str(video_list[video_source_index])
+    key_video_source = f'{event_id}-socket_video_sources-{key_user_video_source}'
+    print("hola", key_video_source)
     transparent_image = Image.open('sb.png').convert('RGBA')
     alfa = 0
     scoreboard = get_scoreboard(event_id)
@@ -104,9 +171,12 @@ def generate_frames(event_id):
         # start_time = time.time()
         if int(redis.get(f'{event_id}-interrupt_flag')):
             redis.set(f'{event_id}-interrupt_flag', int(False))
-            video_source_index = int(redis.get(f'{event_id}-selected_video_source'))
-            key_video_source = f'{event_id}-video_sources-{str(video_source_index)}'
-            
+            video_source_index = int(redis.get(f'{event_id}-selected_socket_video_source'))
+            video_list = redis.get(f'{event_id}-socket_video_sources')
+            bytes_video_list = video_list.decode('utf-8')
+            video_list = ast.literal_eval(bytes_video_list)
+            key_user_video_source = str(video_list[video_source_index])
+            key_video_source = f'{event_id}-socket_video_sources-{key_user_video_source}'
             print(video_source_index)
 
         # frame_bytes = redis.get(key_video_source)
@@ -155,27 +225,24 @@ def generate_frames(event_id):
                b'Content-Type: image/jpeg\r\n\r\n' + video_frame + b'\r\n')
         end_time = time.time()
 
-        # # Calcular el tiempo transcurrido
-        # elapsed_time = end_time - start_time
-        # print("Tiempo procesamiento p/frame: " + str(elapsed_time))
+def start_youtube_streaming():
+    current_user = get_jwt_identity()
+    current_user = current_user['user_id']
+    key = f"user-{current_user}-id_event"
+    event_id = (redis.get(key)).decode('utf-8')
+    value = int(True)
+    if not int(redis.get(f'{event_id}-youtube_streaming_status')):
+        redis.set(f'{event_id}-youtube_streaming_status', value)
+        emit_to_youtube_process = mp.Process(target = emit_to_youtube, args = (redis, event_id))
+        emit_to_youtube_process.start()
+        return {f'{event_id} Youtube Streaming Status': "Streaming started"}
+    return {f'{event_id} Youtube Streaming Status': "Event is already Streaming on youtube"}
 
-def change_video_source(event_id, camera_index):
-    redis.set(f'{event_id}-interrupt_flag', int(True))
-    redis.set(f'{event_id}-selected_video_soruce', int(camera_index))
-    pass
-
-def get_frame_from_redis(key):
-    # Obtener el frame almacenado en Redis
-    encoded_frame = redis.get(key)
-    if encoded_frame is None:
-        print("No frame found in Redis for the given key.")
-        return None
-
-    # Decodificar el frame de base64
-    webp_frame = base64.b64decode(encoded_frame)
-
-    # Convertir los bytes del frame WebP a una matriz de imagen que OpenCV pueda usar
-    image_array = np.frombuffer(webp_frame, dtype=np.uint8)
-    image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-
-    return image
+def stop_youtube_streaming():
+    current_user = get_jwt_identity()
+    current_user = current_user['user_id']
+    key = f"user-{current_user}-id_event"
+    event_id = (redis.get(key)).decode('utf-8')
+    value = int(False)
+    redis.set(f'{event_id}-youtube_streaming_status', value)
+    return {f'{event_id} Youtube Streaming Status': "Streaming Stopped"}

@@ -1,13 +1,19 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>Settings</ion-title>
+    <ion-title>Configuracion</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
+<ion-content>
+  <!-- Contenido de la página de configuración -->
+
+  <!-- Botón rojo en el borde inferior -->
+  <ion-footer>
     <ion-toolbar>
-      <ion-title size="large">Settings</ion-title>
+      <ion-button expand="full" color="danger" (click)="finalizarEvento()">
+        <ion-icon name="close-circle-outline"></ion-icon>
+        Finalizar evento
+      </ion-button>
     </ion-toolbar>
-  </ion-header>
+  </ion-footer>
 </ion-content>

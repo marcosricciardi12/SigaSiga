@@ -7,7 +7,7 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
 # Función para capturar el frame desde Redis
 def capture_frame():
     # Capturar el frame desde Redis
-    frame_bytes = redis_client.get('ABDkAAoYx8w4bfXjxHDjT9-video_frame')  # Ajusta 'frame_key' a la clave donde se guarda el frame en Redis
+    frame_bytes = redis_client.get('eBPkg7WDPDwuzUWzdyjD5P-video_frame')  # Ajusta 'frame_key' a la clave donde se guarda el frame en Redis
     
     # Verificar si se recibió un frame válido
     if frame_bytes:

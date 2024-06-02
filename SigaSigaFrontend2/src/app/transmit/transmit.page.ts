@@ -1,5 +1,8 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import io from 'socket.io-client';
+import { environment } from '../../environments/environment';
+import { StreamingService } from '../services/streaming.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-transmit',
@@ -12,10 +15,13 @@ export class TransmitPage {
   @ViewChild('videoElement', { static: false }) videoElement?: ElementRef<HTMLVideoElement>;
 
   private captureInterval: any;
+  private apiUrl = environment.apiUrl;
+  private token:any;
 
-  constructor() {
+  constructor(private configService: StreamingService, private http: HttpClient) {
     // Initialize socket with Flask server address
-    this.socket = io('https://192.168.54.199:5000');
+    // this.socket = io('https://192.168.54.199:5000');
+    
   }
 
   async toggleCapture() {
@@ -27,6 +33,14 @@ export class TransmitPage {
   }
 
   async startCapture() {
+    this.token = localStorage.getItem('token')
+    console.log(this.token)
+    const headers = { 'Authorization': 'Bearer ' + this.token };
+    const body = { };
+    this.http.post<any>(this.apiUrl + '/config/add_socket_video_source', body, { headers }).subscribe(data => {
+        const datos = data;})
+    // Navegar a otra página si es necesario
+    this.connectWithToken(this.apiUrl);
     this.capturing = true;
     if (this.videoElement) {
       const video = this.videoElement.nativeElement;
@@ -63,6 +77,7 @@ if (this.videoElement && this.videoElement.nativeElement.srcObject) {
     mediaStream.getTracks().forEach(track => {
       track.stop();
     });
+    this.socket.stop()
   }
   }
 
@@ -93,4 +108,14 @@ if (this.videoElement && this.videoElement.nativeElement.srcObject) {
       console.error('Error sending frame:', error);
     }
   }
+
+  connectWithToken(socket_url: string) {
+    const token = localStorage.getItem('token')
+    this.socket = io(socket_url, {
+      query: { token }
+    });
+  }
+
 }
+
+  

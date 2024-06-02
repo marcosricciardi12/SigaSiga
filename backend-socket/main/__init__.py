@@ -3,7 +3,7 @@ from main.config import Config
 from redis import Redis
 from main.starts.load_sports import load_sports
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt_identity
 
 redis = Redis()
 sports, sports_name_list = load_sports()
