@@ -60,7 +60,7 @@ export class TransmitPage {
 
         this.captureInterval = setInterval(() => {
           this.captureAndSendFrame();
-        }, 1000 / 60); // Capture and send a frame every 1/25 seconds (approx. 25 fps)
+        }, 1000 / 30); // Capture and send a frame every 1/25 seconds (approx. 25 fps)
       } catch (error) {
         console.error('Error starting video capture:', error);
       }
@@ -85,8 +85,26 @@ if (this.videoElement && this.videoElement.nativeElement.srcObject) {
     if (this.videoElement) {
       const video = this.videoElement.nativeElement;
       const canvas = document.createElement('canvas');
-      canvas.width = 720;
-      canvas.height = 1280;
+  
+      // Limitar el ancho máximo a 720 y el alto máximo a 1280
+      const maxWidth = 720;
+      const maxHeight = 1280;
+  
+      // Calcular las dimensiones del canvas manteniendo la relación de aspecto original
+      let width = video.videoWidth;
+      let height = video.videoHeight;
+      if (width > maxWidth) {
+        height = Math.round(height * maxWidth / width);
+        width = maxWidth;
+      }
+      if (height > maxHeight) {
+        width = Math.round(width * maxHeight / height);
+        height = maxHeight;
+      }
+  
+      canvas.width = width;
+      canvas.height = height;
+  
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);

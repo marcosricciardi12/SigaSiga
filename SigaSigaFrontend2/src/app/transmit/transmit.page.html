@@ -8,7 +8,7 @@
 
 <ion-content class="ion-padding">
   <!-- Video container -->
-  <div class="video-container">
+  <div class="video-frame" [class.hidden]="!capturing">
     <video #videoElement autoplay playsinline></video>
   </div>
 

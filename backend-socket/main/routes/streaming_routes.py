@@ -4,7 +4,7 @@ from main.services.streaming_services import ( new_event_service, read_data_even
                                               play_event , pause_event, get_sports_list,
                                               stop_event, change_video_source, generate_frames,
                                               change_socket_video_source, get_redis_frame,
-                                              start_youtube_streaming, stop_youtube_streaming)
+                                              start_youtube_streaming2, stop_youtube_streaming)
                                               
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt_header, decode_token
 from functools import wraps
@@ -78,16 +78,17 @@ def change_video_source_event(event_id, camera_index):
     change_video_source(event_id, camera_index)
     return f'Teams setted'
 
-@streaming_bp.route('/change_socket_video_source/', methods=['POST'])
+@streaming_bp.route('/change_socket_video_source/<video_source_index>', methods=['POST'])
 @jwt_required(optional=True)
-def change_socket_video_source_event():
-    change_socket_video_source()
+def change_socket_video_source_event(video_source_index):
+    change_socket_video_source(video_source_index)
     return f'Video Source Changed'
 
 @streaming_bp.route('/start_youtube_streaming', methods=['POST'])
 @jwt_required(optional=True)
 def start_youtube_streaming_event():
-    return start_youtube_streaming()
+    token = request.headers.get('Authorization').split()[1]
+    return start_youtube_streaming2(token)
 
 @streaming_bp.route('/stop_youtube_streaming', methods=['POST'])
 @jwt_required(optional=True)

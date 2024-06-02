@@ -12,10 +12,10 @@ from main import sports, sports_name_list
 from main.models.event import event
 from main.services.scoreboard_services import get_scoreboard
 from main.modules.final_video import generate_final_video
-from main.modules.emit_youtube import emit_to_youtube
+from main.modules.emit_youtube import emit_to_youtube, emit_to_youtube_from_http
 import main.modules.remove_redis_data as remove_redis_data
 from flask import jsonify
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 import uuid
 import ast
 import multiprocessing as mp
@@ -246,3 +246,17 @@ def stop_youtube_streaming():
     value = int(False)
     redis.set(f'{event_id}-youtube_streaming_status', value)
     return {f'{event_id} Youtube Streaming Status': "Streaming Stopped"}
+
+def start_youtube_streaming2(token):
+    print(token)
+    current_user = get_jwt_identity()
+    current_user = current_user['user_id']
+    key = f"user-{current_user}-id_event"
+    event_id = (redis.get(key)).decode('utf-8')
+    value = int(True)
+    if not int(redis.get(f'{event_id}-youtube_streaming_status')):
+        redis.set(f'{event_id}-youtube_streaming_status', value)
+        emit_to_youtube_process = mp.Process(target = emit_to_youtube_from_http, args = (token, redis, event_id))
+        emit_to_youtube_process.start()
+        return {f'{event_id} Youtube Streaming Status': "Streaming started"}
+    return {f'{event_id} Youtube Streaming Status': "Event is already Streaming on youtube"}

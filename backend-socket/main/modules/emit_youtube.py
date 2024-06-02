@@ -1,7 +1,8 @@
 import os
 import subprocess
 import time
-
+import requests
+import re
 
 def capture_frame(redis_client, event_id):
     # Capturar el frame desde Redis
@@ -61,3 +62,44 @@ def generate_and_stream_video(redis_client, event_id):
 
 def emit_to_youtube(redis_client, event_id):
     generate_and_stream_video(redis_client, event_id)
+
+
+
+
+def capture_and_stream_fromhttp(token, redis_client, event_id):
+    # URL de la fuente de video HTTP
+    youtube_rtmp_key = redis_client.get(f'{event_id}-youtube_rtmp_key').decode('utf-8')
+    video_url = "https://localhost:5000/streaming/video_feed/" + '?token=' + token
+
+    ffmpeg_command = [
+    "ffmpeg",
+    "-f", "mjpeg",
+    "-re",
+    "-i", f"{video_url}",
+    "-f", "pulse",
+    "-i", "alsa_output.usb-Kingston_HyperX_Cloud_Stinger_Core___7.1_0000000000000000-00.analog-stereo.monitor",
+    "-c:v", "libx264",
+    "-preset", "ultrafast",
+    "-tune", "zerolatency",
+    "-b:v", "2M",
+    "-bufsize", "2M",
+    "-c:a", "aac",
+    "-b:a", "128k",
+    "-ar", "44100",
+    "-ac", "2",
+    "-f", "flv",
+    f"{youtube_rtmp_key}"
+]
+
+    # Ejecutar el comando ffmpeg
+    process = subprocess.Popen(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    # Leer la salida y los errores del proceso
+    stdout, stderr = process.communicate()
+    print("Start youtube streaming")
+    while int(redis_client.get(f'{event_id}-youtube_streaming_status')) and not int(redis_client.get(f'{event_id}-stop')):
+        pass
+    process.kill()
+        
+def emit_to_youtube_from_http(token, redis_client, event_id):
+    capture_and_stream_fromhttp(token, redis_client, event_id)

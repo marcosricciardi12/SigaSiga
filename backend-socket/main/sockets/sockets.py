@@ -18,9 +18,18 @@ leftover_bytes = b''
 @socketio.on('connect')
 def connect():
     token = request.args.get('token')
+    client_id = request.sid
     try:
         jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
         print('Usuario conectado')
+        token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
+        user_identity = token_decode['sub']['user_id']
+        event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
+        video_source_key = f'{event_id}-socket_video_sources-{user_identity}'
+        key_leftover_bytes = client_id + '-' + event_id
+        leftover_bytes = b''
+        redis.set(key_leftover_bytes, leftover_bytes)
+
     except jwt.ExpiredSignatureError:
         print('Token expirado')
         return False
@@ -135,12 +144,15 @@ def handle_frame(frame):
 
 @socketio.on('frame')
 def handle_frame_from_client(data):
-    global leftover_bytes
+    client_id = request.sid
     token = request.args.get('token')
     token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
     user_identity = token_decode['sub']['user_id']
     event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
     video_source_key = f'{event_id}-socket_video_sources-{user_identity}'
+
+    key_leftover_bytes = client_id + '-' + event_id
+    leftover_bytes  = redis.get(key_leftover_bytes)
     # print(video_source_key)
     try:
         pass
@@ -167,6 +179,7 @@ def handle_frame_from_client(data):
             if start_index == -1:
                 # No se encontró el próximo marcador de inicio, guardar bytes sobrantes
                 leftover_bytes = frame_bytes
+                redis.set(key_leftover_bytes, leftover_bytes)
                 break
 
             # Buscar el próximo marcador de inicio
@@ -174,6 +187,7 @@ def handle_frame_from_client(data):
             if next_start_index == -1:
                 # No se encontró el próximo marcador, guardar bytes sobrantes
                 leftover_bytes = frame_bytes[start_index:]
+                redis.set(key_leftover_bytes, leftover_bytes)
                 break
 
             # Extraer el frame WebP completo
@@ -181,8 +195,8 @@ def handle_frame_from_client(data):
 
             # Guardar el frame WebP en Redis
             redis.set(video_source_key, base64.b64encode(webp_frame))
-            print(video_source_key)
-            print("Frame guardado correctamente")
+            # print(video_source_key)
+            # print("Frame guardado correctamente")
 
     except Exception as e:
         print("Error al procesar el frame:", e)

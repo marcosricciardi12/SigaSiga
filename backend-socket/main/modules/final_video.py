@@ -52,22 +52,31 @@ def generate_final_video(redis_db, event_id):
             # Convertir el frame de OpenCV a Pillow
             pillow_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             pillow_frame = Image.fromarray(pillow_frame)
-            # pillow_frame = pillow_frame.resize((1440, 1080))
+            y_factor = 1080/pillow_frame.height
+            height_frame = 1080
+            width_frame = int(pillow_frame.width * y_factor)
+            pillow_frame = pillow_frame.resize((width_frame, height_frame))
             pillow_frame = pillow_frame.convert("RGBA")
             # Crear un lienzo de 1920x1080 y agregar el frame en el centro
             canvas = Image.new('RGBA', (1920, 1080), color='black')
             draw = ImageDraw.Draw(canvas)
+            
+            
             canvas.paste(pillow_frame, ((1920 - pillow_frame.width) // 2, (1080 - pillow_frame.height) // 2))
             
             # Agregar la imagen con transparencia en el centro inferior cercano al borde
             if video_source_index!=0:
                 canvas.paste(scoreboard_image, ((1920 - scoreboard_image.width) // 2, 1080 - scoreboard_image.height), mask=scoreboard_image)
-            hora = str(datetime.now().strftime("%H:%M:%S"))
-            draw.text((1920-200,1080-100), hora , fill="white", font=ImageFont.truetype("arial.ttf", 32))
-            draw.text((600,930), scoreboard["local_team_short"] , fill="white", font=ImageFont.truetype("arial.ttf", 64))
-            draw.text((785,930), scoreboard["local_points"] , fill="black", font=ImageFont.truetype("arial.ttf", 64))
-            draw.text((939,930), scoreboard["visitor_team_short"] , fill="white", font=ImageFont.truetype("arial.ttf", 64))
-            draw.text((1124,930), scoreboard["visitor_points"] , fill="black", font=ImageFont.truetype("arial.ttf", 64))
+                hora = str(datetime.now().strftime("%H:%M:%S"))
+                draw.text((1920-200,1080-100), hora , fill="white", font=ImageFont.truetype("arial.ttf", 32))
+                draw.text((600,930), scoreboard["local_team_short"] , fill="white", font=ImageFont.truetype("arial.ttf", 64))
+                draw.text((785,930), scoreboard["local_points"] , fill="black", font=ImageFont.truetype("arial.ttf", 64))
+                draw.text((939,930), scoreboard["visitor_team_short"] , fill="white", font=ImageFont.truetype("arial.ttf", 64))
+                draw.text((1124,930), scoreboard["visitor_points"] , fill="black", font=ImageFont.truetype("arial.ttf", 64))
+            else:
+                hora = str(datetime.now().strftime("%H:%M:%S"))
+                draw.text((1920-200,1080-100), hora , fill="white", font=ImageFont.truetype("arial.ttf", 32))
+
             canvas = canvas.convert('RGB')
             # canvas.save("img.jpeg")
             # Convertir el lienzo a bytes
@@ -78,8 +87,8 @@ def generate_final_video(redis_db, event_id):
             buffer.seek(0)
             video_frame = buffer.read()
             redis_db.set(f'{event_id}-video_frame', video_frame)
-    except:
-        print("Generacion de video terminada.(Excepcion)")
+    except Exception as e:
+        print("Generacion de video terminada.(Excepcion)", e)
     os._exit(0)
 
 def get_frame_from_redis(key, redis):
