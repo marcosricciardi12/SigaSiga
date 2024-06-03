@@ -5,15 +5,56 @@
 </ion-header>
 
 <ion-content>
-  <!-- Contenido de la página de configuración -->
+  <div class="container">
+    <!-- Contenido de la página de configuración -->
+    <ion-list style="border-radius: 10px;">
+      <ion-item>
+        <ion-icon class="ion-icon-yt-font-size" name="logo-youtube"></ion-icon>
+        <div>
+          <ion-label style="margin: 10px;"><p>Configuracion YouTube Streaming</p></ion-label>
+        </div>
+      </ion-item>
 
-  <!-- Botón rojo en el borde inferior -->
-  <ion-footer>
-    <ion-toolbar>
-      <ion-button expand="full" color="danger" (click)="finalizarEvento()">
-        <ion-icon name="close-circle-outline"></ion-icon>
-        Finalizar evento
-      </ion-button>
-    </ion-toolbar>
-  </ion-footer>
+      <ion-item *ngIf="noRtmpKey">
+        <ion-toggle [disabled]="true" justify="space-between">Transmitir en youtube</ion-toggle>
+      </ion-item>
+
+      <ion-item *ngIf="!noRtmpKey">
+        <ion-toggle [disabled]="false" (ionChange)="onToggleChange($event)" justify="space-between">Transmitir en youtube</ion-toggle>
+      </ion-item>
+
+      <ion-item>
+        <div style="padding-top: 10px; padding-bottom: 10px;">
+          <div>
+            <ion-label ><p>Youtube streaming Key</p></ion-label>
+          </div>
+          <div>
+            <ion-input class="container-input" [(ngModel)]="yt_rtmp_key_input" label="" type="password" value="password" fill="outline"></ion-input>
+            
+          </div>
+        </div>
+        <ion-button class="send-yt-key-button" style="margin-left: auto;" shape="round" (click)="onSendKey()">
+          <ion-icon name="send-outline"></ion-icon>
+        </ion-button>
+      </ion-item>
+
+      <ion-item *ngIf="noRtmpKey">
+        <ion-label style="margin: 10px;"><p>Ingrese su clave RTPM</p></ion-label>
+      </ion-item>
+
+      <ion-item *ngIf="!noRtmpKey">
+        <ion-label style="margin: 10px;"><p>Clave RTMP disponible: {{yt_rtmp_key}}</p></ion-label>
+      </ion-item>
+
+    </ion-list>
+
+
+    <!-- Botón rojo en el borde inferior -->
+    <div class = "finalizar-button">
+        <ion-button  class="rounded-button" expand="full" color="danger" (click)="finalizarEvento()">
+          <ion-icon name="close-circle-outline"></ion-icon>
+          Finalizar evento
+        </ion-button>
+      </div>
+  </div>
 </ion-content>

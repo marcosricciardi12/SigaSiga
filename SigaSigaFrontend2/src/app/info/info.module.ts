@@ -8,7 +8,6 @@ import { InfoPageRoutingModule } from './info-routing.module';
 
 import { InfoPage } from './info.page';
 
-
 @NgModule({
   imports: [
     CommonModule,

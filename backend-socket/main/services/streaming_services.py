@@ -248,7 +248,6 @@ def stop_youtube_streaming():
     return {f'{event_id} Youtube Streaming Status': "Streaming Stopped"}
 
 def start_youtube_streaming2(token):
-    print(token)
     current_user = get_jwt_identity()
     current_user = current_user['user_id']
     key = f"user-{current_user}-id_event"

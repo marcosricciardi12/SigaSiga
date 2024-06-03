@@ -34,4 +34,32 @@ export class StreamingService {
     );
   }
 
+    set_yt_rtmp_key(params: any) {
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+    console.log(params)
+    return this.http.post(this.apiUrl + '/config/set_yt_rtmp_key', params, { headers });
+  }
+
+  play_yt_streaming() {
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post(this.apiUrl + '/streaming/start_youtube_streaming', {}, { headers });
+  }
+
+  stop_yt_streaming() {
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post(this.apiUrl + '/streaming/stop_youtube_streaming', {}, { headers });
+  }
+
 }

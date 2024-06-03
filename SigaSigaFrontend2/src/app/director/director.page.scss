@@ -1,0 +1,22 @@
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2vw; // Ajusta el espaciado según el ancho de la pantalla
+  }
+  
+  .image-box {
+    background-color: #0084ff; /* Color de fondo */
+    border-radius: clamp(5px, 2vw, 15px); /* Esquinas levemente redondeadas con valores adaptables */
+    padding: clamp(3px, 1vw, 7px); /* Espaciado interno adaptable */
+    max-width: 100%; // Asegura que el contenedor no exceda el ancho de la pantalla
+    box-sizing: border-box; // Incluye el padding y el borde en el ancho total
+  }
+  
+  .centered-image {
+    width: 100%; // Asegura que la imagen se ajuste al tamaño del contenedor
+    max-width: 1080px; // Limita el ancho máximo a 1080px
+    height: auto; // Mantiene la proporción del video
+    display: block; // Asegura que la imagen se comporte como un bloque dentro del contenedor
+    margin: auto; // Centra la imagen dentro del contenedor
+  }

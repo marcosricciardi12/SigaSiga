@@ -87,8 +87,11 @@ def generate_final_video(redis_db, event_id):
             buffer.seek(0)
             video_frame = buffer.read()
             redis_db.set(f'{event_id}-video_frame', video_frame)
+        
+        redis_db.delete(f'{event_id}-video_frame')
     except Exception as e:
         print("Generacion de video terminada.(Excepcion)", e)
+        redis_db.delete(f'{event_id}-video_frame')
     os._exit(0)
 
 def get_frame_from_redis(key, redis):

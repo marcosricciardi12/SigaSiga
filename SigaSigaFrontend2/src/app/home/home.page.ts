@@ -19,6 +19,13 @@ export class HomePage implements OnInit {
   ) {}
 
   ngOnInit() {
+    const domain = window.location.host;
+    const protocol = window.location.protocol;
+    const full_domain = protocol + "//" + domain
+
+// Imprimir el dominio en la consola
+    console.log(`El dominio de la página es: ${full_domain}`);
+
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/menu']); // Redirigir a otra página si el usuario está autenticado
     } else {

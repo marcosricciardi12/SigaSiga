@@ -41,6 +41,14 @@ const routes: Routes = [
   {
     path: '',
     loadChildren: () => import('./home/home.module').then( m => m.HomePageModule)
+  },
+  {
+    path: 'director',
+    loadChildren: () => import('./director/director.module').then( m => m.DirectorPageModule)
+  },
+  {
+    path: 'join-event',
+    loadChildren: () => import('./join-event/join-event.module').then( m => m.JoinEventPageModule)
   }
 ];
 @NgModule({

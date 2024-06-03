@@ -1,6 +1,73 @@
-ion-footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 10;
-  }
+ion-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.container {
+  width: calc(100% - 32px); /* Deja espacio para el padding */
+  max-width: 1080px;
+  height: calc(100% - 32px); /* Deja espacio para el padding */
+  margin-top: 16px;
+  margin: 0 auto; /* Centra el contenedor horizontalmente */
+  border: 3px solid rgb(0, 174, 255); /* Marco azul claro */
+  border-radius: 3%;
+  box-sizing: border-box; /* Incluye el borde en el tamaño total del contenedor */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Asegura que el contenido y el footer estén separados */
+  background-color: transparent; /* Fondo transparente */
+  padding: 16px; /* Opcional: espacio interior del contenedor */
+  position: relative;
+}
+
+
+.finalizar-button {
+  position: absolute;
+  border-radius: 10px;
+  width: calc(100% - 32px);
+  bottom: 10px;
+}
+
+.container-yt {
+  display: flex;
+  align-items: center;
+}
+
+.container-input {
+  max-width: 75%;
+}
+
+.rounded-button-yt {
+  --border-radius: 50%;
+    width: 48px;
+    height: 48px;
+  --background: #0077ff; /* Puedes ajustar este color a un tono más claro de azul */
+  --background-activated: #00b7ff; /* Color de fondo cuando se presiona el botón */
+  --box-shadow: none; /* Elimina cualquier sombra predeterminada del botón */
+  margin-left: 10px; /* Ajusta el espacio entre los botones si es necesario */
+  font-size: 15px;
+}
+
+.ion-icon-font-size {
+  font-size: max;
+}
+
+.ion-icon-yt-font-size {
+  font-size: 64px;
+}
+
+.send-yt-key-button{
+  margin-left: auto;
+  --border-radius: 50%;
+    width: 48px;
+    height: 48px;
+  --background: #0077ff; /* Puedes ajustar este color a un tono más claro de azul */
+  --background-activated: #00b7ff; /* Color de fondo cuando se presiona el botón */
+  --box-shadow: none; /* Elimina cualquier sombra predeterminada del botón */
+  margin-left: 10px; /* Ajusta el espacio entre los botones si es necesario */
+  font-size: 15px;
+}

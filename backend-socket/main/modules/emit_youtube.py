@@ -70,7 +70,8 @@ def capture_and_stream_fromhttp(token, redis_client, event_id):
     # URL de la fuente de video HTTP
     youtube_rtmp_key = redis_client.get(f'{event_id}-youtube_rtmp_key').decode('utf-8')
     video_url = "https://localhost:5000/streaming/video_feed/" + '?token=' + token
-
+    youtube_url = "rtmp://a.rtmp.youtube.com/live2"
+    rtmp_url = youtube_url + '/' + youtube_rtmp_key
     ffmpeg_command = [
     "ffmpeg",
     "-f", "mjpeg",
@@ -88,18 +89,22 @@ def capture_and_stream_fromhttp(token, redis_client, event_id):
     "-ar", "44100",
     "-ac", "2",
     "-f", "flv",
-    f"{youtube_rtmp_key}"
+    f"{rtmp_url}"
 ]
 
     # Ejecutar el comando ffmpeg
     process = subprocess.Popen(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Leer la salida y los errores del proceso
-    stdout, stderr = process.communicate()
+    
     print("Start youtube streaming")
     while int(redis_client.get(f'{event_id}-youtube_streaming_status')) and not int(redis_client.get(f'{event_id}-stop')):
         pass
+
     process.kill()
+    os._exit(0)
         
 def emit_to_youtube_from_http(token, redis_client, event_id):
+    print("emit to yt from http : ", token)
     capture_and_stream_fromhttp(token, redis_client, event_id)
+    os._exit(0)
