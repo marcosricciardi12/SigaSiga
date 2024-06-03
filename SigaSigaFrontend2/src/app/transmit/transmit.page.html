@@ -23,5 +23,8 @@
     <ion-button [color]="capturing ? 'danger' : 'medium'" (click)="toggleCapture()" shape="round">
       <ion-icon name="{{ capturing ? 'square' : 'ellipse' }}"></ion-icon>
     </ion-button>
+    <ion-button (click)="rotateImage()" shape="round">
+      <ion-icon name="sync"></ion-icon>
+    </ion-button>
   </div>
 </ion-content>

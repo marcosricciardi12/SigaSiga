@@ -13,15 +13,14 @@ export class TransmitPage {
   private socket: any;
   public capturing: boolean = false;
   @ViewChild('videoElement', { static: false }) videoElement?: ElementRef<HTMLVideoElement>;
-
   private captureInterval: any;
   private apiUrl = environment.apiUrl;
-  private token:any;
+  private token: any;
+  private rotation: number = 0; // Nueva variable para mantener el estado de la rotación
 
   constructor(private configService: StreamingService, private http: HttpClient) {
     // Initialize socket with Flask server address
     // this.socket = io('https://192.168.54.199:5000');
-    
   }
 
   async toggleCapture() {
@@ -72,24 +71,24 @@ export class TransmitPage {
   stopCapture() {
     this.capturing = false;
     clearInterval(this.captureInterval);
-if (this.videoElement && this.videoElement.nativeElement.srcObject) {
-    const mediaStream = this.videoElement.nativeElement.srcObject as MediaStream;
-    mediaStream.getTracks().forEach(track => {
-      track.stop();
-    });
-    this.socket.stop()
-  }
+    if (this.videoElement && this.videoElement.nativeElement.srcObject) {
+      const mediaStream = this.videoElement.nativeElement.srcObject as MediaStream;
+      mediaStream.getTracks().forEach(track => {
+        track.stop();
+      });
+      this.socket.stop()
+    }
   }
 
   captureAndSendFrame() {
     if (this.videoElement) {
       const video = this.videoElement.nativeElement;
       const canvas = document.createElement('canvas');
-  
+
       // Limitar el ancho máximo a 720 y el alto máximo a 1280
       const maxWidth = 720;
       const maxHeight = 1280;
-  
+
       // Calcular las dimensiones del canvas manteniendo la relación de aspecto original
       let width = video.videoWidth;
       let height = video.videoHeight;
@@ -101,14 +100,25 @@ if (this.videoElement && this.videoElement.nativeElement.srcObject) {
         width = Math.round(width * maxHeight / height);
         height = maxHeight;
       }
-  
-      canvas.width = width;
-      canvas.height = height;
-  
+
+      // Ajustar el tamaño del canvas según la rotación
+      if (this.rotation % 180 !== 0) {
+        canvas.width = height;
+        canvas.height = width;
+      } else {
+        canvas.width = width;
+        canvas.height = height;
+      }
+
       const context = canvas.getContext('2d');
       if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/webp', 0.35);
+        context.save(); // Guardar el estado actual del contexto
+        context.translate(canvas.width / 2, canvas.height / 2); // Mover el origen al centro del canvas
+        context.rotate(this.rotation * Math.PI / 180); // Aplicar la rotación
+        context.drawImage(video, -width / 2, -height / 2, width, height); // Dibujar el video
+        context.restore(); // Restaurar el estado del contexto
+
+        const dataUrl = canvas.toDataURL('image/webp', 0.05);
         const base64Data = dataUrl.split(',')[1];
         this.sendFrame(base64Data);
       } else {
@@ -134,6 +144,9 @@ if (this.videoElement && this.videoElement.nativeElement.srcObject) {
     });
   }
 
+  rotateImage() {
+    this.rotation = (this.rotation + 90) % 360;
+  }
 }
 
   
