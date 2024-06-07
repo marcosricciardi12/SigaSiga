@@ -62,4 +62,31 @@ export class StreamingService {
     return this.http.post(this.apiUrl + '/streaming/stop_youtube_streaming', {}, { headers });
   }
 
+  add_new_participant(web_domain : any): Observable<any> {
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post<any>(this.apiUrl + "/config/add_new_participant", {"web_url": web_domain}, { headers });
+  }
+
+  getParticipants() {
+    let auth_token = localStorage.getItem('token');
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth_token}`
+      });
+      return this.http.get((this.apiUrl)+'/config/get_participant_list', {headers: headers});
+  }
+
+  getParticipant(user_id: any) {
+    let auth_token = localStorage.getItem('token');
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth_token}`
+      });
+      return this.http.get((this.apiUrl)+'/config/get_participant/'+user_id.toString(), {headers: headers});
+  }
+
 }

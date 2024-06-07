@@ -20,8 +20,12 @@ export class DirectorPage implements OnInit, OnDestroy {
   constructor(private http: HttpClient, private _sanitizer: DomSanitizer) {}
 
   ngOnInit() {
-    this.videoStreamUrl = `${this.apiUrl}/streaming/video_feed`;
+    const domain = window.location.host;
+    const protocol = window.location.protocol;
+    const full_domain = protocol + "//" + domain
+
     this.authToken = localStorage.getItem('token');
+    // this.videoStreamUrl = `${full_domain}${this.apiUrl}/streaming/video_feed?token=${this.authToken}`;
     this.videoStreamUrl = `${this.apiUrl}/streaming/video_feed?token=${this.authToken}`;
     console.log(this.videoStreamUrl)
     this.imageElement = document.getElementById('video-stream') as HTMLImageElement;

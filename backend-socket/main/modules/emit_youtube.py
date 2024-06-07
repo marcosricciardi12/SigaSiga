@@ -73,24 +73,25 @@ def capture_and_stream_fromhttp(token, redis_client, event_id):
     youtube_url = "rtmp://a.rtmp.youtube.com/live2"
     rtmp_url = youtube_url + '/' + youtube_rtmp_key
     ffmpeg_command = [
-    "ffmpeg",
-    "-f", "mjpeg",
-    "-re",
-    "-i", f"{video_url}",
-    "-f", "pulse",
-    "-i", "alsa_output.usb-Kingston_HyperX_Cloud_Stinger_Core___7.1_0000000000000000-00.analog-stereo.monitor",
-    "-c:v", "libx264",
-    "-preset", "ultrafast",
-    "-tune", "zerolatency",
-    "-b:v", "2M",
-    "-bufsize", "2M",
-    "-c:a", "aac",
-    "-b:a", "128k",
-    "-ar", "44100",
-    "-ac", "2",
-    "-f", "flv",
-    f"{rtmp_url}"
-]
+        "ffmpeg",
+        "-f", "mjpeg",
+        "-re",
+        "-r", "30",  # Limita los fps a 30
+        "-i", f"{video_url}",
+        "-f", "pulse",
+        "-i", "alsa_output.usb-Kingston_HyperX_Cloud_Stinger_Core___7.1_0000000000000000-00.analog-stereo.monitor",
+        "-c:v", "libx264",
+        # "-preset", "ultrafast",
+        # "-tune", "zerolatency",
+        # "-b:v", "2M",
+        # "-bufsize", "2M",
+        "-c:a", "aac",
+        "-b:a", "128k",
+        "-ar", "44100",
+        "-ac", "2",
+        "-f", "flv",
+        f"{rtmp_url}"
+    ]
 
     # Ejecutar el comando ffmpeg
     process = subprocess.Popen(ffmpeg_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

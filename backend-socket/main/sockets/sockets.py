@@ -1,6 +1,7 @@
+import ast
 import base64
 import time
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, disconnect
 from flask import request
 from main import redis
 import jwt
@@ -29,6 +30,7 @@ def connect():
         key_leftover_bytes = client_id + '-' + event_id
         leftover_bytes = b''
         redis.set(key_leftover_bytes, leftover_bytes)
+        print("Client connected")
 
     except jwt.ExpiredSignatureError:
         print('Token expirado')
@@ -36,6 +38,29 @@ def connect():
     except jwt.InvalidTokenError:
         print('Token inválido')
         return False
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    token = request.args.get('token')
+    client_id = request.sid
+    try:
+        jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
+        token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
+        user_identity = token_decode['sub']['user_id']
+        event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
+        print('Client disconnected!!!')
+
+    except jwt.ExpiredSignatureError:
+        print('Token expirado')
+        return False
+    except jwt.InvalidTokenError:
+        print('Token inválido')
+        return False
+    
+
+@socketio.on('disconnect_request')
+def handle_disconnect_request():
+    disconnect()
 
 @socketio.on('send_parameters')
 def handle_parameters(data):
@@ -142,6 +167,8 @@ def handle_frame(frame):
 #     except Exception as e:
 #         print("Error al procesar el frame:", e)
 
+
+
 @socketio.on('frame')
 def handle_frame_from_client(data):
     client_id = request.sid
@@ -149,7 +176,7 @@ def handle_frame_from_client(data):
     token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
     user_identity = token_decode['sub']['user_id']
     event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
-    video_source_key = f'{event_id}-socket_video_sources-{user_identity}'
+    video_source_key = f'{event_id}-socket_video_sources-{client_id}'
 
     key_leftover_bytes = client_id + '-' + event_id
     leftover_bytes  = redis.get(key_leftover_bytes)
@@ -200,3 +227,59 @@ def handle_frame_from_client(data):
 
     except Exception as e:
         print("Error al procesar el frame:", e)
+
+
+@socketio.on('add_video_socket')
+def handle_add_socket_from_client():
+    client_id = request.sid
+    token = request.args.get('token')
+    token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
+    user_identity = token_decode['sub']['user_id']
+    event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
+    video_source_key = f'{event_id}-socket_video_sources-{client_id}'
+
+    video_list = redis.get(f'{event_id}-socket_video_sources')
+    if video_list:
+        bytes_video_list = video_list.decode('utf-8')
+        video_list = ast.literal_eval(bytes_video_list)
+    else:
+        video_list = []
+    video_list.append(client_id)
+    redis.set(f'{event_id}-socket_video_sources', str(video_list))
+
+    print("Video socket added: ", video_source_key)
+    return {"video_source_list": video_list}
+
+
+@socketio.on('del_video_socket')
+def handle_del_socket_from_client():
+    client_id = request.sid
+    token = request.args.get('token')
+    token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
+    user_identity = token_decode['sub']['user_id']
+    event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
+    video_source_key = f'{event_id}-socket_video_sources-{client_id}'
+
+    video_list = redis.get(f'{event_id}-socket_video_sources')
+    print("hay que eliminar video de la siguiente lista: ")
+    print(video_list)
+    if video_list:
+        bytes_video_list = video_list.decode('utf-8')
+        video_list = ast.literal_eval(bytes_video_list)
+        video_source_index =  int(video_list.index(client_id))
+        print("video a eliminar indice: ", video_source_index)
+        video_selected_index = int(redis.get(f'{event_id}-selected_socket_video_source'))
+        print("video seleccionado indice: ", video_selected_index)
+        if video_source_index == video_selected_index:
+            redis.set(f'{event_id}-interrupt_flag', int(True))
+            redis.set(f'{event_id}-selected_socket_video_source', int(0))
+        print("cliente a remover: ",  client_id)
+        video_list.remove(client_id)
+        redis.delete(video_source_key)
+        redis.set(f'{event_id}-socket_video_sources', str(video_list))
+    else:
+        video_list = []
+    
+    
+    
+    return {"video_source_list": video_list}

@@ -3,6 +3,7 @@ import { NavController } from '@ionic/angular';
 import { AuthService } from '../services/auth.service';
 import { ParametersService } from '../services/parameters.service';
 import { StreamingService } from '../services/streaming.service';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-settings',
@@ -12,14 +13,23 @@ import { StreamingService } from '../services/streaming.service';
 export class SettingsPage implements OnInit {
   yt_rtmp_key:any;
   yt_rtmp_key_input: any;
+  join_url:any;
+  role:any;
+  encoded_img:any
+  imagePath:any;
+  user_id:any;
+  arrayParticipants:any;
+
   constructor(private navCtrl: NavController, 
     private authService: AuthService,
     private paramService: ParametersService,
     private streamingService: StreamingService,
+    private _sanitizer: DomSanitizer,
   ) { }
 
   ngOnInit() {
     this.getParameter_rtmp_key("youtube_rtmp_key")
+    this.getParticipants()
     console.log(this.yt_rtmp_key)
   }
 
@@ -66,7 +76,7 @@ export class SettingsPage implements OnInit {
         response => {
           console.log('Respuesta del servidor:', response);
           // Una vez completada la lógica, actualiza la página
-          this.refreshPage();
+          this.getParameter_rtmp_key("youtube_rtmp_key")
         },
         error => {
           console.error('Error al enviar la clave:', error);
@@ -104,5 +114,59 @@ export class SettingsPage implements OnInit {
       );
     }
   }
+  isModalNewParticipant = false;
 
+  setOpenModalParticipant(isOpen: boolean) {
+    this.isModalNewParticipant = isOpen;
+    if (this.isModalNewParticipant){
+      this.new_participant()
+      this.getParticipants()
+    }
+  }
+
+  new_participant(){
+    const domain = window.location.host;
+    const protocol = window.location.protocol;
+    const web_domain = protocol + "//" + domain
+    this.streamingService.add_new_participant(web_domain).subscribe((data:any) =>{
+      this.join_url = data.join_url;
+      this.role = data.role;
+      this.user_id = data.user_id
+      this.encoded_img = data.join_qr_img;
+      this.imagePath = this._sanitizer.bypassSecurityTrustResourceUrl('data:image/png;base64,' 
+                 + this.encoded_img);
+      console.log(data)
+    })
+    this.getParticipants()
+  }
+
+  getParticipants(){
+    this.streamingService.getParticipants().subscribe((data:any) =>{
+      console.log('JSON data: ', data);
+      this.arrayParticipants = data.participants;
+      console.log('Paginacion actual: ', this.arrayParticipants);
+    })
+  }
+
+  getParticipant(user_id:any){
+    this.streamingService.getParticipant(user_id).subscribe((data:any) =>{
+      this.join_url = data.join_url;
+      this.role = data.role;
+      this.user_id = data.user_id
+      this.encoded_img = data.join_qr_img;
+      this.imagePath = this._sanitizer.bypassSecurityTrustResourceUrl('data:image/png;base64,' 
+                 + this.encoded_img);
+      console.log(data)
+    })
+  }
+
+  isModalGetParticipant = false;
+
+  setOpenModalGetParticipant(isOpen: boolean, user_id: string) {
+    this.isModalGetParticipant = isOpen;
+    if (this.isModalGetParticipant){
+      this.getParticipant(user_id)
+    }
+  }
+  
 }

@@ -15,6 +15,7 @@ export class TransmitPage {
   @ViewChild('videoElement', { static: false }) videoElement?: ElementRef<HTMLVideoElement>;
   private captureInterval: any;
   private apiUrl = environment.apiUrl;
+  
   private token: any;
   private rotation: number = 0; // Nueva variable para mantener el estado de la rotación
 
@@ -36,11 +37,12 @@ export class TransmitPage {
     console.log(this.token)
     const headers = { 'Authorization': 'Bearer ' + this.token };
     const body = { };
-    this.http.post<any>(this.apiUrl + '/config/add_socket_video_source', body, { headers }).subscribe(data => {
-        const datos = data;})
+    // this.http.post<any>(this.apiUrl + '/config/add_socket_video_source', body, { headers }).subscribe(data => {
+    //     const datos = data;})
     // Navegar a otra página si es necesario
     this.connectWithToken(this.apiUrl);
     this.capturing = true;
+    this.socket.emit('add_video_socket');
     if (this.videoElement) {
       const video = this.videoElement.nativeElement;
 
@@ -76,7 +78,9 @@ export class TransmitPage {
       mediaStream.getTracks().forEach(track => {
         track.stop();
       });
-      this.socket.stop()
+      this.socket.emit('del_video_socket');
+      this.socket.emit('disconnect_request');
+      // this.socket.stop()
     }
   }
 
@@ -139,6 +143,7 @@ export class TransmitPage {
 
   connectWithToken(socket_url: string) {
     const token = localStorage.getItem('token')
+    console.log(socket_url)
     this.socket = io(socket_url, {
       query: { token }
     });

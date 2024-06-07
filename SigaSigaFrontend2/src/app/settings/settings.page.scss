@@ -71,3 +71,44 @@ ion-content {
   margin-left: 10px; /* Ajusta el espacio entre los botones si es necesario */
   font-size: 15px;
 }
+
+.circular-button {
+  margin-left: auto;
+  --border-radius: 50%;
+    width: 48px;
+    height: 48px;
+  --background: #0077ff; /* Puedes ajustar este color a un tono más claro de azul */
+  --background-activated: #00b7ff; /* Color de fondo cuando se presiona el botón */
+  --box-shadow: none; /* Elimina cualquier sombra predeterminada del botón */
+  margin-left: 10px; /* Ajusta el espacio entre los botones si es necesario */
+  font-size: 15px;
+}
+
+.circular-button-add {
+  --border-radius: 50%;
+    width: max-content;
+    height: max-content;
+  --background: #0077ff; /* Puedes ajustar este color a un tono más claro de azul */
+  --background-activated: #00b7ff; /* Color de fondo cuando se presiona el botón */
+  --box-shadow: none; /* Elimina cualquier sombra predeterminada del botón */
+  font-size: max;
+}
+
+ion-buttons[slot="secondary"] {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.qr_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.qr_container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}

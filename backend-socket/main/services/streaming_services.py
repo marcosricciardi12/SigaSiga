@@ -116,12 +116,13 @@ def generate_frames(current_user):
 
     try:
         while not int(redis.get(f'{event_id}-stop')):
+            time.sleep(1/33)
             video_frame = redis.get(f'{event_id}-video_frame')
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + video_frame + b'\r\n')
             
-    except:
-        print("End generate frames")
+    except Exception as e:
+        print("End generate frames: ", e)
 
 def change_video_source(event_id, camera_index):
     redis.set(f'{event_id}-interrupt_flag', int(True))

@@ -1,3 +1,4 @@
+import time
 import cv2
 import numpy as np
 import redis
@@ -15,8 +16,9 @@ def base64_to_image(base64_string):
 if __name__ == '__main__':
     # Leer el fotograma desde Redis
     while True:
-        frame_data = redis_client.get('HGxwWW4HEKjmuVecjUgFds-video_frame') #bytes
-        print(frame_data[:30])
+        time.sleep(1/30)
+        frame_data = redis_client.get('bGsEivZuWwRvk7LXk25E6W-socket_video_sources-3n9wPeFs1HqKkH-RAAAH') #bytes
+        # print(frame_data[:30])
         if frame_data is not None:
             # Convertir el fotograma de base64 a imagen
             frame_image = base64_to_image(frame_data)
