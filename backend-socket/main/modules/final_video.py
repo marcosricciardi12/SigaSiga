@@ -102,10 +102,10 @@ def get_frame_from_redis(key, redis):
         return None
 
     # Decodificar el frame de base64
-    webp_frame = base64.b64decode(encoded_frame)
+    # webp_frame = base64.b64decode(encoded_frame)
+    webp_frame = encoded_frame
 
     # Convertir los bytes del frame WebP a una matriz de imagen que OpenCV pueda usar
     image_array = np.frombuffer(webp_frame, dtype=np.uint8)
     image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
-
     return image

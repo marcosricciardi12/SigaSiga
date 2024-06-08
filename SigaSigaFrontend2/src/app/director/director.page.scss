@@ -1,22 +1,63 @@
 .image-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2vw; // Ajusta el espaciado según el ancho de la pantalla
-  }
-  
-  .image-box {
-    background-color: #0084ff; /* Color de fondo */
-    border-radius: clamp(5px, 2vw, 15px); /* Esquinas levemente redondeadas con valores adaptables */
-    padding: clamp(3px, 1vw, 7px); /* Espaciado interno adaptable */
-    max-width: 100%; // Asegura que el contenedor no exceda el ancho de la pantalla
-    box-sizing: border-box; // Incluye el padding y el borde en el ancho total
-  }
-  
-  .centered-image {
-    width: 100%; // Asegura que la imagen se ajuste al tamaño del contenedor
-    max-width: 1080px; // Limita el ancho máximo a 1080px
-    height: auto; // Mantiene la proporción del video
-    display: block; // Asegura que la imagen se comporte como un bloque dentro del contenedor
-    margin: auto; // Centra la imagen dentro del contenedor
-  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2vw; /* Ajusta el espaciado según el ancho de la pantalla */
+}
+
+.image-box {
+  background-color: #0084ff; /* Color de fondo */
+  border-radius: clamp(5px, 2vw, 15px); /* Esquinas levemente redondeadas con valores adaptables */
+  padding: clamp(3px, 1vw, 7px); /* Espaciado interno adaptable */
+  max-width: 100%; /* Asegura que el contenedor no exceda el ancho de la pantalla */
+  box-sizing: border-box; /* Incluye el padding y el borde en el ancho total */
+}
+
+.centered-image {
+  width: 100%; /* Asegura que la imagen se ajuste al tamaño del contenedor */
+  max-width: 1080px; /* Limita el ancho máximo a 1080px */
+  height: auto; /* Mantiene la proporción del video */
+  display: block; /* Asegura que la imagen se comporte como un bloque dentro del contenedor */
+  margin: auto; /* Centra la imagen dentro del contenedor */
+}
+
+.centered-cards-container {
+  width: 100%; /* Asegura que la imagen se ajuste al tamaño del contenedor */
+  max-width: 1080px; /* Limita el ancho máximo a 1080px */
+  height: auto; /* Mantiene la proporción del video */
+  display: block; /* Asegura que la imagen se comporte como un bloque dentro del contenedor */
+  margin: auto; /* Centra la imagen dentro del contenedor */
+  align-items: center;
+}
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px; /* Espacio entre las cards */
+  padding: 16px; /* Espacio interno del contenedor de cards */
+  align-items: center;
+  margin: auto;
+}
+
+.card {
+  min-width: 320px;
+  background-color: #ffffff; /* Color de fondo de las cards */
+  border-radius: 8px; /* Esquinas redondeadas de las cards */
+  padding: 16px; /* Espaciado interno de las cards */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra para las cards */
+  text-align: center; /* Centramos el contenido dentro de las cards */
+  /* Ajustamos la altura en relación al ancho */
+  aspect-ratio: 16 / 9;
+  align-items: center;
+  margin: auto;
+}
+
+.card-toggle {
+  position: absolute;
+  top: 8px; /* Ajusta el valor según sea necesario */
+  right: 8px; /* Ajusta el valor según sea necesario */
+}
+
+.image-video-source{
+  aspect-ratio: 16 / 9;
+}

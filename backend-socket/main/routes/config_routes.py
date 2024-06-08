@@ -4,7 +4,8 @@ from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from main.services.config_services import  (add_video_source, add_socket_video_source, set_yt_rtmp_key, 
                                             add_new_participant, get_event_participants, 
-                                            join_event, get_some_parameter, get_event_participant)
+                                            join_event, get_some_parameter, get_event_participant,
+                                            get_event_video_sources_list)
 
 config_bp = Blueprint('config', __name__, url_prefix='/config')
 
@@ -67,3 +68,14 @@ def get_some_parameter_event(parameter):
     current_user = get_jwt_identity()
     current_user = current_user['user_id']
     return get_some_parameter(current_user, parameter)
+
+
+get_event_video_sources_list
+
+@config_bp.route('/get_video_sources_list', methods=['GET'])
+@jwt_required(optional=True)
+def get_event_video_sources_list_event():
+    # data = request.get_json()
+    current_user = get_jwt_identity()
+    current_user = current_user['user_id']
+    return get_event_video_sources_list(current_user)

@@ -15,4 +15,18 @@
       <img [src]="videoStreamUrl" alt="Video 1" class="centered-image">
     </div>
   </div>
+  <div class="centered-cards-container">
+    <div class="cards-container">
+
+      <ion-card  *ngFor="let video_source of video_source_array; let i = index">
+        <ion-card-header>
+          <ion-toggle [(ngModel)]="video_source.active" (ionChange)="toggleChanged(i)" ></ion-toggle>
+          <ion-card-subtitle>{{video_source.title}}</ion-card-subtitle>
+        </ion-card-header>
+        <img class="image-video-source" alt="Silhouette of mountains" [src]="video_source.video_URL" />
+      </ion-card>
+      <!-- Agrega más cards según sea necesario -->
+    </div>
+  </div>
+
 </ion-content>

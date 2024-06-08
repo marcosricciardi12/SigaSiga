@@ -8,7 +8,7 @@ import base64
 redis_client = redis.Redis(host='localhost', port=6379, db=0)  # Ajusta la configuración según tu entorno
 
 def base64_to_image(base64_string):
-    decoded_data = np.frombuffer(base64.b64decode(base64_string), np.uint8)
+    decoded_data = np.frombuffer(base64_string, np.uint8)
     image = cv2.imdecode(decoded_data, cv2.IMREAD_COLOR)
     return image
 
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # Leer el fotograma desde Redis
     while True:
         time.sleep(1/30)
-        frame_data = redis_client.get('bGsEivZuWwRvk7LXk25E6W-socket_video_sources-3n9wPeFs1HqKkH-RAAAH') #bytes
+        frame_data = redis_client.get('ScchtzMp2NvTR2D6UGkME3-socket_video_sources-xWa47hBH9sBXKxJIAAAH') #bytes
         # print(frame_data[:30])
         if frame_data is not None:
             # Convertir el fotograma de base64 a imagen

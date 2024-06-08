@@ -89,4 +89,22 @@ export class StreamingService {
       return this.http.get((this.apiUrl)+'/config/get_participant/'+user_id.toString(), {headers: headers});
   }
 
+  getVideoSources() {
+    let auth_token = localStorage.getItem('token');
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${auth_token}`
+      });
+      return this.http.get((this.apiUrl)+'/config/get_video_sources_list', {headers: headers});
+  }
+
+  change_video_source(index:any) {
+    const token = localStorage.getItem('token')
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+    return this.http.post(this.apiUrl + '/streaming/change_socket_video_source/'+ index.toString(), {}, { headers });
+  }
+
 }

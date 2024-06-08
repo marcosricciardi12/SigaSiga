@@ -221,7 +221,8 @@ def handle_frame_from_client(data):
             webp_frame = frame_bytes[start_index:next_start_index]
 
             # Guardar el frame WebP en Redis
-            redis.set(video_source_key, base64.b64encode(webp_frame))
+            # redis.set(video_source_key, base64.b64encode(webp_frame))
+            redis.set(video_source_key, webp_frame)
             # print(video_source_key)
             # print("Frame guardado correctamente")
 

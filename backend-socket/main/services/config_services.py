@@ -99,6 +99,26 @@ def get_event_participants(current_user):
     keys_dict = {"participants": [redis.get(key.decode('utf-8')).decode('utf-8') for key in list_keys]}
     return jsonify(keys_dict)
 
+
+
+def get_event_video_sources_list(current_user):
+    event_id = redis.get(f"user-{current_user}-id_event")
+    event_id = event_id.decode('utf-8')
+    video_list = redis.get(f'{event_id}-socket_video_sources')
+    if video_list:
+        bytes_video_list = video_list.decode('utf-8')
+        video_list = ast.literal_eval(bytes_video_list)
+    selected_video_source = int(redis.get(f"{event_id}-selected_socket_video_source"))
+    list_video_source = []
+    for video_source in video_list:
+        title = video_source
+        if title == video_list[selected_video_source]:
+            status = True
+        else:
+            status = False
+        list_video_source.append({"title": title, "active": status})
+    return jsonify(list_video_source)
+
 def scan_keys(pattern):
     print(pattern)
     cursor = '0'

@@ -2,8 +2,8 @@ from flask import Blueprint, Response, request, jsonify
 from flask import render_template
 from main.services.streaming_services import ( new_event_service, read_data_event , 
                                               play_event , pause_event, get_sports_list,
-                                              stop_event, change_video_source, generate_frames,
-                                              change_socket_video_source, get_redis_frame,
+                                              stop_event, change_video_source, generate_http_frames_final_video,
+                                              change_socket_video_source, generate_http_frames_source_video,
                                               start_youtube_streaming2, stop_youtube_streaming)
                                               
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt_header, decode_token
@@ -65,11 +65,14 @@ def stop():
 def video_feed():
     current_user = request.user_identity 
     print(current_user)
-    return Response(generate_frames(current_user), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_http_frames_final_video(current_user), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@streaming_bp.route('/video_feed/<event_id>', methods=['GET'])
-def video_feed_event(event_id):
-    return Response(get_redis_frame(event_id), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@streaming_bp.route('/video_feed_source/<source_id>', methods=['GET'])
+@token_required
+def video_feed_event(source_id):
+    current_user = request.user_identity 
+    return Response(generate_http_frames_source_video(current_user, source_id), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 @streaming_bp.route('/change_video_source/<event_id>/<camera_index>', methods=['POST'])
