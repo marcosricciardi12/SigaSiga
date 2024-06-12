@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   apiUrl: 'https://192.168.54.199:5000'
-  // apiUrl: 'https://7df1-190-15-198-27.ngrok-free.app/api'
+  // apiUrl: 'https://ac44-190-15-198-27.ngrok-free.app'
   // apiUrl: "https://10.203.0.154:5000/"
   // apiUrl: 'https://190.15.198.27:7777'
   // apiUrl: '/api',

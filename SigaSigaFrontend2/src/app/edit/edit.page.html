@@ -1,13 +1,197 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Edit</ion-title>
+    <ion-title>Marcador</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Edit</ion-title>
+      <ion-title size="large">Marcador</ion-title>
     </ion-toolbar>
   </ion-header>
+
+  <ion-grid>
+    <!-- Tiempo -->
+     <ion-row class="centered-row">
+      <ion-col size="12">
+        <ion-item lines="none">
+          <ion-label position="stacked">Tiempo:</ion-label>
+          <div class="button-group">
+            <ion-button shape="round" class="round-button" (click)="playTime()">
+              <ion-icon slot="icon-only" name="play"></ion-icon>
+            </ion-button>
+            <ion-button shape="round" class="round-button" (click)="pauseTime()">
+              <ion-icon slot="icon-only" name="pause"></ion-icon>
+            </ion-button>
+            <ion-button shape="round" class="round-button" (click)="configTime()">
+              <ion-icon slot="icon-only" name="settings"></ion-icon>
+            </ion-button>
+          </div>
+          <ion-label class="variable">{{ tiempo }}</ion-label>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <!-- Reloj 24 -->
+    <ion-row class="centered-row">
+      <ion-col size="12">
+        <ion-item lines="none">
+          <ion-label position="stacked">Reloj 24:</ion-label>
+          <div class="button-group">
+            <ion-button shape="round" class="round-button" (click)="playReloj24()">
+              <ion-icon slot="icon-only" name="play"></ion-icon>
+            </ion-button>
+            <ion-button shape="round" class="round-button" (click)="pauseReloj24()">
+              <ion-icon slot="icon-only" name="pause"></ion-icon>
+            </ion-button>
+            <ion-button shape="round" class="round-button" (click)="resetReloj24()">
+              <ion-icon slot="icon-only" name="refresh"></ion-icon>
+            </ion-button>
+          </div>
+          <ion-label class="variable">{{ reloj24 }}</ion-label>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+        <!-- Periodo -->
+        <ion-row class="centered-row">
+          <ion-col size="12">
+            <ion-item lines="none">
+              <ion-label>Periodo:</ion-label>
+              <div class="button-group">
+                <ion-button shape="round" class="round-button" (click)="decrementPeriodo()">
+                  <ion-icon name="remove-circle-outline"></ion-icon>
+                </ion-button>
+                <ion-label class="variable">{{ periodo }}</ion-label>
+                <ion-button shape="round" class="round-button" (click)="incrementPeriodo()">
+                  <ion-icon name="add-circle-outline"></ion-icon>
+                </ion-button>
+              </div>
+            </ion-item>
+          </ion-col>
+        </ion-row>
+
+    <!-- Puntos equipo local -->
+    <ion-row class="centered-row">
+      <ion-col size="12">
+        <ion-item lines="none">
+          <ion-row class="centered-row"></ion-row>
+          <ion-label>Puntos equipo local:</ion-label>
+          <ion-col size="6">
+            <ion-row class="centered-row">
+              <div class="button-group">
+                <ion-button (click)="decrementPuntosLocal(1)"><ion-icon name="remove-circle-outline"></ion-icon>1</ion-button>
+                <ion-button (click)="decrementPuntosLocal(2)"><ion-icon name="remove-circle-outline"></ion-icon>2</ion-button>
+                <ion-button (click)="decrementPuntosLocal(3)"><ion-icon name="remove-circle-outline"></ion-icon>3</ion-button>
+              </div>
+            </ion-row>
+            <ion-row class="centered-row">
+              <div class="button-group">
+                <ion-label class="variable">{{ puntosLocal }}</ion-label>
+              </div>
+            </ion-row>
+            <ion-row class="centered-row">
+              <div class="button-group">
+                <ion-button (click)="incrementPuntosLocal(1)"><ion-icon name="add-circle-outline"></ion-icon>1</ion-button>
+                <ion-button (click)="incrementPuntosLocal(2)"><ion-icon name="add-circle-outline"></ion-icon>2</ion-button>
+                <ion-button (click)="incrementPuntosLocal(3)"><ion-icon name="add-circle-outline"></ion-icon>3</ion-button>
+              </div>
+            </ion-row>
+          </ion-col>
+          
+          <!-- <div class="button-group">
+            <ion-button shape="round" class="round-button" (click)="decrementPuntosLocal(3)">-3</ion-button>
+            <ion-button shape="round" class="round-button" (click)="decrementPuntosLocal(2)">-2</ion-button>
+            <ion-button shape="round" class="round-button" (click)="decrementPuntosLocal(1)">-1</ion-button>
+            <ion-label class="variable">{{ puntosLocal }}</ion-label>
+            <ion-button shape="round" class="round-button" (click)="incrementPuntosLocal(1)">+1</ion-button>
+            <ion-button shape="round" class="round-button" (click)="incrementPuntosLocal(2)">+2</ion-button>
+            <ion-button shape="round" class="round-button" (click)="incrementPuntosLocal(3)">+3</ion-button>
+          </div> -->
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+
+
+    <!-- Puntos equipo visita -->
+    <ion-row class="centered-row">
+
+      <ion-col size="12">
+        <ion-item lines="none">
+          <ion-label>Puntos equipo visita:</ion-label>
+          <ion-col size="6">
+            <ion-row class="centered-row">
+              <div class="button-group">
+                <ion-button (click)="decrementPuntosVisita(1)"><ion-icon name="remove-circle-outline"></ion-icon>1</ion-button>
+                <ion-button (click)="decrementPuntosVisita(2)"><ion-icon name="remove-circle-outline"></ion-icon>2</ion-button>
+                <ion-button (click)="decrementPuntosVisita(3)"><ion-icon name="remove-circle-outline"></ion-icon>3</ion-button>
+              </div>
+            </ion-row>
+            <ion-row class="centered-row">
+              <div class="button-group">
+                <ion-label class="variable">{{ puntosVisita }}</ion-label>
+              </div>
+            </ion-row>
+            <ion-row class="centered-row">
+              <div class="button-group">
+                <ion-button (click)="incrementPuntosVisita(1)"><ion-icon name="add-circle-outline"></ion-icon>1</ion-button>
+                <ion-button (click)="incrementPuntosVisita(2)"><ion-icon name="add-circle-outline"></ion-icon>2</ion-button>
+                <ion-button (click)="incrementPuntosVisita(3)"><ion-icon name="add-circle-outline"></ion-icon>3</ion-button>
+              </div>
+            </ion-row>
+          </ion-col>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <!-- Faltas equipo local -->
+    <ion-row class="centered-row">
+      <ion-col size="12">
+        <ion-item lines="none">
+          <ion-label>Faltas equipo local:</ion-label>
+          <div class="button-group">
+            <ion-button shape="round" class="round-button" (click)="decrementFaltasLocal()">
+              <ion-icon name="remove-circle-outline"></ion-icon>
+            </ion-button>
+            <ion-label class="variable">{{ faltasLocal }}</ion-label>
+            <ion-button shape="round" class="round-button" (click)="incrementFaltasLocal()">
+              <ion-icon name="add-circle-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+
+    <!-- Faltas equipo visita -->
+    <ion-row class="centered-row">
+      <ion-col size="12">
+        <ion-item lines="none">
+          <ion-label>Faltas equipo visita:</ion-label>
+          <div class="button-group">
+            <ion-button shape="round" class="round-button" (click)="decrementFaltasVisita()">
+              <ion-icon name="remove-circle-outline"></ion-icon>
+            </ion-button>
+            <ion-label class="variable">{{ faltasVisita }}</ion-label>
+            <ion-button shape="round" class="round-button" (click)="incrementFaltasVisita()">
+              <ion-icon name="add-circle-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row class="centered-row">
+      <ion-col size="12">
+        <ion-item lines="none">
+          <ion-label position="stacked">Nombres de Equipos:</ion-label>
+          <ion-input placeholder="Nombre Local" [(ngModel)]="nombreLocal"></ion-input>
+          <ion-input placeholder="Nombre Visita" [(ngModel)]="nombreVisita"></ion-input>
+          <ion-button slot="end" shape="round" class="round-button" (click)="capturarNombres()">
+            <ion-icon slot="icon-only" name="send"></ion-icon>
+          </ion-button>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>

@@ -13,6 +13,8 @@ from main.models.event import event
 from main.services.scoreboard_services import get_scoreboard
 from main.modules.final_video import generate_final_video
 from main.modules.emit_youtube import emit_to_youtube, emit_to_youtube_from_http
+from main.modules.countdown_timer import countdown_timer
+from main.modules.countdown_timer24 import countdown_timer24
 import main.modules.remove_redis_data as remove_redis_data
 from flask import jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
@@ -67,6 +69,11 @@ def new_event_service(sport_id):
     final_video_process = mp.Process(target = generate_final_video, args = (redis, event_id))
     final_video_process.start()
 
+    timer_process = mp.Process(target = countdown_timer, args= (event_id,))
+    timer_process.start()
+
+    timer24_process = mp.Process(target = countdown_timer24, args= (event_id,))
+    timer24_process.start()
     return {"token": access_token, "event_id": event_id}
 
 def read_data_event(event_id):

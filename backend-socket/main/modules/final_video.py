@@ -7,6 +7,8 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 from main.services.scoreboard_services import get_scoreboard
+from main import redis
+from main import sports, sports_name_list
 import ast
 import io
 
@@ -73,6 +75,8 @@ def generate_final_video(redis_db, event_id):
                 draw.text((785,930), scoreboard["local_points"] , fill="black", font=ImageFont.truetype("arial.ttf", 64))
                 draw.text((939,930), scoreboard["visitor_team_short"] , fill="white", font=ImageFont.truetype("arial.ttf", 64))
                 draw.text((1124,930), scoreboard["visitor_points"] , fill="black", font=ImageFont.truetype("arial.ttf", 64))
+                draw.text((800,1015), scoreboard["formatted_time"] , fill="white", font=ImageFont.truetype("arial.ttf", 42))
+                draw.text((1086,1015), scoreboard["24time"] , fill="white", font=ImageFont.truetype("arial.ttf", 42))
             else:
                 hora = str(datetime.now().strftime("%H:%M:%S"))
                 draw.text((1920-200,1080-100), hora , fill="white", font=ImageFont.truetype("arial.ttf", 32))
@@ -109,3 +113,14 @@ def get_frame_from_redis(key, redis):
     image_array = np.frombuffer(webp_frame, dtype=np.uint8)
     image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
     return image
+
+def get_scoreboard(event_id):
+    sport_id = int(redis.get(f'{event_id}-sport_id'))
+    sport_name = sports_name_list[sport_id]
+    sport = sports[sport_id]
+    scoreboard = sport[sport_name]["scoreboard"]
+    # print(scoreboard)
+    for attribute in scoreboard:
+    #    print(attribute)
+       scoreboard[attribute] = redis.get(f'{event_id}-scoreboard-{attribute}').decode("utf-8")
+    return scoreboard

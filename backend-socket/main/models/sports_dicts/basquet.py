@@ -10,6 +10,7 @@ basquet = {
                                 "visitor_fouls": 0,
                                 "period": 0,
                                 "time": 0,
+                                "formatted_time": "00:00.0",
                                 "24time": 0,
                                 "play_time": int(False),
                                 "play_24time": int(False)
