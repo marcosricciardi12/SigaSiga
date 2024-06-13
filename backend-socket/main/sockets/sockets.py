@@ -2,7 +2,7 @@ import ast
 import base64
 import time
 from flask_socketio import SocketIO, disconnect
-from flask import request
+from flask import jsonify, request
 from main import redis
 import jwt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -27,9 +27,7 @@ def connect():
         user_identity = token_decode['sub']['user_id']
         event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
         video_source_key = f'{event_id}-socket_video_sources-{user_identity}'
-        key_leftover_bytes = client_id + '-' + event_id
-        leftover_bytes = b''
-        redis.set(key_leftover_bytes, leftover_bytes)
+        
         print("Client connected")
 
     except jwt.ExpiredSignatureError:
@@ -237,6 +235,11 @@ def handle_add_socket_from_client():
     token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
     user_identity = token_decode['sub']['user_id']
     event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
+
+    key_leftover_bytes = client_id + '-' + event_id
+    leftover_bytes = b''
+    redis.set(key_leftover_bytes, leftover_bytes)
+    
     video_source_key = f'{event_id}-socket_video_sources-{client_id}'
 
     video_list = redis.get(f'{event_id}-socket_video_sources')
@@ -249,6 +252,8 @@ def handle_add_socket_from_client():
     redis.set(f'{event_id}-socket_video_sources', str(video_list))
 
     print("Video socket added: ", video_source_key)
+    video_list_to_send = get_event_video_sources_list(event_id, video_list)
+    director_room_notify(event_id, video_list_to_send)
     return {"video_source_list": video_list}
 
 
@@ -281,6 +286,73 @@ def handle_del_socket_from_client():
     else:
         video_list = []
     
-    
-    
+    video_list_to_send = get_event_video_sources_list(event_id, video_list)
+    director_room_notify(event_id, video_list_to_send)
     return {"video_source_list": video_list}
+
+
+@socketio.on('director_room_join')
+def handle_director_room_join():
+    print("Se ha unido alguien a la sala de director")
+    client_id = request.sid
+    token = request.args.get('token')
+    token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
+    user_identity = token_decode['sub']['user_id']
+    event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
+
+    director_room_list = redis.get(f'{event_id}-director_room')
+    if director_room_list:
+        bytes_director_room_list = director_room_list.decode('utf-8')
+        director_room_list = ast.literal_eval(bytes_director_room_list)
+    else:
+        director_room_list = []
+    director_room_list.append(client_id)
+    print(director_room_list)
+    redis.set(f'{event_id}-director_room', str(director_room_list))
+
+
+@socketio.on('director_room_leave')
+def handle_director_room_leave():
+    client_id = request.sid
+    token = request.args.get('token')
+    token_decode = jwt.decode(token, "asfgakdfjsdkfhkas", algorithms=["HS256"])
+    user_identity = token_decode['sub']['user_id']
+    event_id = (redis.get(f"user-{user_identity}-id_event")).decode('utf-8')
+
+    director_room_list = redis.get(f'{event_id}-director_room')
+    if director_room_list:
+        bytes_director_room_list = director_room_list.decode('utf-8')
+        director_room_list = ast.literal_eval(bytes_director_room_list)
+    else:
+        director_room_list = []
+    director_room_list.remove(client_id)
+    redis.set(f'{event_id}-director_room', str(director_room_list))
+
+
+
+def director_room_notify(event_id, video_list_to_send):
+    print(event_id)
+    director_room_list = redis.get(f'{event_id}-director_room')
+    print("Hay que notificar a: ", director_room_list)
+    if director_room_list:
+        bytes_director_room_list = director_room_list.decode('utf-8')
+        director_room_list = ast.literal_eval(bytes_director_room_list)
+    else:
+        director_room_list = []
+    print("Hay que notificar a: ", director_room_list)
+    for client_id in director_room_list:
+         print("\n\nnotify to: ", client_id)
+         print(video_list_to_send)
+         socketio.emit('directors_notification', {"video_list":(video_list_to_send)}, to=client_id)
+
+def get_event_video_sources_list(event_id, video_list):
+    selected_video_source = int(redis.get(f"{event_id}-selected_socket_video_source"))
+    list_video_source = []
+    for video_source in video_list:
+        title = video_source
+        if title == video_list[selected_video_source]:
+            status = True
+        else:
+            status = False
+        list_video_source.append({"title": title, "active": status})
+    return str(list_video_source)

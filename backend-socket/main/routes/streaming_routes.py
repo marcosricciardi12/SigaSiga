@@ -81,10 +81,10 @@ def change_video_source_event(event_id, camera_index):
     change_video_source(event_id, camera_index)
     return f'Teams setted'
 
-@streaming_bp.route('/change_socket_video_source/<video_source_index>', methods=['POST'])
+@streaming_bp.route('/change_socket_video_source/<video_source_name>', methods=['POST'])
 @jwt_required(optional=True)
-def change_socket_video_source_event(video_source_index):
-    change_socket_video_source(video_source_index)
+def change_socket_video_source_event(video_source_name):
+    change_socket_video_source(video_source_name)
     return f'Video Source Changed'
 
 @streaming_bp.route('/start_youtube_streaming', methods=['POST'])

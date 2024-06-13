@@ -122,7 +122,7 @@ export class TransmitPage {
         context.drawImage(video, -width / 2, -height / 2, width, height); // Dibujar el video
         context.restore(); // Restaurar el estado del contexto
 
-        const dataUrl = canvas.toDataURL('image/webp', 0.05);
+        const dataUrl = canvas.toDataURL('image/webp', 0.50);
         const base64Data = dataUrl.split(',')[1];
         this.sendFrame(base64Data);
       } else {

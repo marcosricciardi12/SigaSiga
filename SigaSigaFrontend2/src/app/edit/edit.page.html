@@ -18,10 +18,10 @@
         <ion-item lines="none">
           <ion-label position="stacked">Tiempo:</ion-label>
           <div class="button-group">
-            <ion-button shape="round" class="round-button" (click)="playTime()">
+            <ion-button *ngIf="!timer_status" shape="round" class="round-button" (click)="play_pauseTime()">
               <ion-icon slot="icon-only" name="play"></ion-icon>
             </ion-button>
-            <ion-button shape="round" class="round-button" (click)="pauseTime()">
+            <ion-button *ngIf="timer_status" shape="round" class="round-button" (click)="play_pauseTime()">
               <ion-icon slot="icon-only" name="pause"></ion-icon>
             </ion-button>
             <ion-button shape="round" class="round-button" (click)="configTime()">

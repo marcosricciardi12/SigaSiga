@@ -98,13 +98,13 @@ export class StreamingService {
       return this.http.get((this.apiUrl)+'/config/get_video_sources_list', {headers: headers});
   }
 
-  change_video_source(index:any) {
+  change_video_source(video_name:any) {
     const token = localStorage.getItem('token')
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     });
-    return this.http.post(this.apiUrl + '/streaming/change_socket_video_source/'+ index.toString(), {}, { headers });
+    return this.http.post(this.apiUrl + '/streaming/change_socket_video_source/'+ video_name.toString(), {}, { headers });
   }
 
 }

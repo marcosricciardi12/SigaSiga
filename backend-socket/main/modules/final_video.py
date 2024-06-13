@@ -75,6 +75,7 @@ def generate_final_video(redis_db, event_id):
                 draw.text((785,930), scoreboard["local_points"] , fill="black", font=ImageFont.truetype("arial.ttf", 64))
                 draw.text((939,930), scoreboard["visitor_team_short"] , fill="white", font=ImageFont.truetype("arial.ttf", 64))
                 draw.text((1124,930), scoreboard["visitor_points"] , fill="black", font=ImageFont.truetype("arial.ttf", 64))
+                draw.text((600,1015), scoreboard["period"] , fill="white", font=ImageFont.truetype("arial.ttf", 42))
                 draw.text((800,1015), scoreboard["formatted_time"] , fill="white", font=ImageFont.truetype("arial.ttf", 42))
                 draw.text((1086,1015), scoreboard["24time"] , fill="white", font=ImageFont.truetype("arial.ttf", 42))
             else:
@@ -90,6 +91,7 @@ def generate_final_video(redis_db, event_id):
             canvas.save(buffer, format="JPEG")
             buffer.seek(0)
             video_frame = buffer.read()
+            time.sleep(1/30)
             redis_db.set(f'{event_id}-video_frame', video_frame)
         
         redis_db.delete(f'{event_id}-video_frame')

@@ -8,6 +8,7 @@ import { ScoreboardService } from '../services/scoreboard.service';
   styleUrls: ['./edit.page.scss'],
 })
 export class EditPage implements OnInit {
+  timer_status: boolean = false;
   tiempo: string = '00:00:0';
   reloj24: string = '00';
   puntosLocal: number = 0;
@@ -26,6 +27,21 @@ export class EditPage implements OnInit {
 
   ngOnInit() {
   }
+
+  play_pauseTime() {
+    this.scoreboardService.change_timer_status().subscribe(
+      (response:any) => {
+        console.log('Respuesta del servidor:', response);
+        this.timer_status = Boolean(response.timer_status)
+        console.log("timer status", this.timer_status)
+        // Una vez completada la lógica, actualiza la página
+      },
+      error => {
+        console.error('Error al enviar la clave:', error);
+      }
+    );
+  }
+  
 
   playTime() {
     this.scoreboardService.change_timer_status().subscribe(
@@ -90,9 +106,10 @@ export class EditPage implements OnInit {
 
   incrementPuntosLocal(value: number) {
     this.scoreboardService.add_points('local', value).subscribe(
-      response => {
+      (response:any) => {
         console.log('Respuesta del servidor:', response);
         // Una vez completada la lógica, actualiza la página
+        this.puntosLocal = response.local_points
       },
       error => {
         console.error('Error al enviar la clave:', error);
@@ -102,9 +119,10 @@ export class EditPage implements OnInit {
 
   decrementPuntosLocal(value: number) {
     this.scoreboardService.sub_points('local', value).subscribe(
-      response => {
+      (response:any) => {
         console.log('Respuesta del servidor:', response);
         // Una vez completada la lógica, actualiza la página
+        this.puntosLocal = response.local_points
       },
       error => {
         console.error('Error al enviar la clave:', error);
@@ -114,9 +132,10 @@ export class EditPage implements OnInit {
 
   incrementPuntosVisita(value: number) {
     this.scoreboardService.add_points('visitor', value).subscribe(
-      response => {
+      (response:any) => {
         console.log('Respuesta del servidor:', response);
         // Una vez completada la lógica, actualiza la página
+        this.puntosVisita = response.visitor_points;
       },
       error => {
         console.error('Error al enviar la clave:', error);
@@ -126,9 +145,10 @@ export class EditPage implements OnInit {
 
   decrementPuntosVisita(value: number) {
     this.scoreboardService.sub_points('visitor', value).subscribe(
-      response => {
+      (response:any) => {
         console.log('Respuesta del servidor:', response);
         // Una vez completada la lógica, actualiza la página
+        this.puntosVisita = response.visitor_points;
       },
       error => {
         console.error('Error al enviar la clave:', error);

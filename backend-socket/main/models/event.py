@@ -15,4 +15,5 @@ event = {
     "selected_socket_video_source": 0,
     "youtube_rtmp_key": "",
     "youtube_streaming_status": int(False),
+    "director_room": str([]),
 }

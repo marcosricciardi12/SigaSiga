@@ -123,7 +123,7 @@ def generate_http_frames_final_video(current_user):
 
     try:
         while not int(redis.get(f'{event_id}-stop')):
-            time.sleep(1/33)
+            time.sleep(1/29)
             video_frame = redis.get(f'{event_id}-video_frame')
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + video_frame + b'\r\n')
@@ -153,13 +153,19 @@ def change_video_source(event_id, camera_index):
     redis.set(f'{event_id}-selected_video_source', int(camera_index))
     pass
 
-def change_socket_video_source(video_index):
+def change_socket_video_source(video_name):
     current_user = get_jwt_identity()
     current_user = current_user['user_id']
     key = f"user-{current_user}-id_event"
     event_id = (redis.get(key)).decode('utf-8')
+    video_list = redis.get(f'{event_id}-socket_video_sources')
+    if video_list:
+        bytes_video_list = video_list.decode('utf-8')
+        video_list = ast.literal_eval(bytes_video_list)
+    else:
+        video_list = []
     redis.set(f'{event_id}-interrupt_flag', int(True))
-    redis.set(f'{event_id}-selected_socket_video_source', int(video_index))
+    redis.set(f'{event_id}-selected_socket_video_source', int(video_list.index(video_name)))
     pass
 
 
