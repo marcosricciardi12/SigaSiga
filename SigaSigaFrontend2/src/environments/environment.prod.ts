@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://mi-backend.com/api',
+  apiUrl: 'https://192.168.54.199:5000',
 };

@@ -7,4 +7,4 @@ app, socketio = create_app()
 #     # socketio.run(host = "0.0.0.0", debug=True, app = app)
 
 if __name__ == "__main__":
-    socketio.run(host="0.0.0.0", port=5000, debug=True, app=app, ssl_context=('cert.pem', 'key.pem'))
+    socketio.run(app=app)

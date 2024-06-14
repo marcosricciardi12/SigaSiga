@@ -4,6 +4,7 @@ from redis import Redis
 from main.starts.load_sports import load_sports
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt_identity
+import eventlet
 
 redis = Redis(host="192.168.54.199")
 sports, sports_name_list = load_sports()
@@ -34,6 +35,6 @@ def create_app():
     from main.sockets.sockets import socketio
 
     CORS(app)
-    socketio.init_app(app, cors_allowed_origins="*")
+    socketio.init_app(app, cors_allowed_origins="*", async_mode='eventlet')
 
     return app, socketio

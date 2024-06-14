@@ -13,5 +13,5 @@ shortuuid
 numpy
 requests
 qrcode
-eventlet
-uwsgi
+gunicorn
+eventlet  # o gevent
